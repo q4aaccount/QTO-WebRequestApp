@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QTO Request Portal</title>
+    <title>QTO Project Request Portal</title>
+    <meta
+      name="description"
+      content="QTO project request portal for project selection, elevation styles, project stages, and historical requests."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -15,15 +19,15 @@
         <div class="auth-brand">
           <div class="auth-badge">Q</div>
           <div>
-            <p class="eyebrow mini">Project Control</p>
+            <p class="mini-label">Project Control</p>
             <h1>QTO</h1>
           </div>
         </div>
 
-        <p class="auth-subtitle">Request portal for project style and stage submissions.</p>
+        <p class="auth-subtitle">Request portal for project styles and stage submissions.</p>
 
         <div class="info-box">
-          <strong>Admin</strong><br />
+          <strong>Demo access</strong><br />
           Email: <span>admin@qto.local</span><br />
           Password: <span>Admin123!</span>
         </div>
@@ -37,7 +41,7 @@
             Password
             <input type="password" name="password" placeholder="Enter password" required />
           </label>
-          <button type="submit" class="primary-btn">Sign In</button>
+          <button type="submit" class="primary-btn">Sign in</button>
         </form>
 
         <div id="login-message" class="message hidden"></div>
@@ -57,7 +61,7 @@
         <nav class="nav">
           <button class="nav-btn active" data-view="dashboard">Dashboard</button>
           <button class="nav-btn" data-view="history">History</button>
-          <button class="nav-btn" data-view="admin" id="admin-nav">Admin</button>
+          <button class="nav-btn" data-view="admin">Admin</button>
         </nav>
 
         <div class="sidebar-panel">
@@ -72,7 +76,7 @@
       <main class="main-panel">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Project Request System</p>
+            <p class="eyebrow">Project request system</p>
             <h3 id="welcome-name">User</h3>
           </div>
           <div class="topbar-actions">

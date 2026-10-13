@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": "admin-1",
+      "name": "Administrator",
+      "email": "admin@qto.local",
+      "password": "Admin123!",
+      "role": "admin",
+      "active": true
+    }
+  ],
+  "projects": [
+    {
+      "id": "project-1",
+      "name": "North Tower",
+      "code": "NTR-01",
+      "elevations": ["Elevation A", "Elevation B", "Elevation C"],
+      "stages": ["Schematic Design", "Working Drawing", "Construction Documentation"]
+    },
+    {
+      "id": "project-2",
+      "name": "Harbor Residences",
+      "code": "HR-22",
+      "elevations": ["Elevation A", "Elevation B"],
+      "stages": ["Schematic Design", "Working Drawing"]
+    }
+  ],
+  "requests": [
+    {
+      "id": "req-001",
+      "requestNo": "QTO-20261013-100",
+      "projectId": "project-1",
+      "projectName": "North Tower",
+      "elevation": "Elevation A",
+      "stage": "Schematic Design",
+      "requestedBy": "Administrator",
+      "status": "submitted",
+      "notes": "Initial review for concept package.",
+      "createdAt": "2026-10-13T10:00:00.000Z",
+      "downloadUrl": ""
+    }
+  ]
+}

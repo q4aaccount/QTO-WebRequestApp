@@ -1,182 +1,595 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QTO Request Portal</title>
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body>
-    <div id="auth-screen" class="auth-shell">
-      <div class="auth-card">
-        <div class="auth-badge">QTO</div>
-        <h1>Request Portal</h1>
-        <p class="auth-subtitle">Sign in to submit project requests and review history.</p>
+* {
+  box-sizing: border-box;
+}
 
-        <div class="info-box">
-          Default admin user: <strong>admin@qto.local</strong><br />
-          Password: <strong>Admin123!</strong>
-        </div>
+:root {
+  --bg: #f3f7ff;
+  --panel: #ffffff;
+  --panel-alt: #f7faff;
+  --surface: #edf3ff;
+  --sidebar: #0f172a;
+  --sidebar-soft: #172338;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --text: #122033;
+  --muted: #5a7188;
+  --line: #dfeaf7;
+  --green: #11875b;
+  --green-soft: #ebfff6;
+  --blue: #1d4ed8;
+  --blue-soft: #edf3ff;
+  --purple: #7c3aed;
+  --purple-soft: #f2eafe;
+  --orange: #d97706;
+  --orange-soft: #fff1d9;
+  --danger: #dc2626;
+  --danger-soft: #fdecec;
+  --shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+}
 
-        <form id="login-form">
-          <label>
-            Email
-            <input type="email" name="email" placeholder="admin@qto.local" required />
-          </label>
-          <label>
-            Password
-            <input type="password" name="password" placeholder="Enter password" required />
-          </label>
-          <button type="submit" class="primary-btn">Sign In</button>
-        </form>
+html {
+  scroll-behavior: smooth;
+}
 
-        <div id="login-message" class="message hidden"></div>
-      </div>
-    </div>
+body {
+  margin: 0;
+  font-family: "Inter", Arial, sans-serif;
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fbff 100%);
+  color: var(--text);
+}
 
-    <div id="app-shell" class="app-shell hidden">
-      <aside class="sidebar">
-        <div class="brand-box">
-          <div class="brand-mark">Q</div>
-          <div>
-            <small>Project Control</small>
-            <h2>QTO</h2>
-          </div>
-        </div>
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
 
-        <nav class="nav">
-          <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-          <button class="nav-btn" data-view="history">History</button>
-          <button class="nav-btn" data-view="admin" id="admin-nav">Admin</button>
-        </nav>
-      </aside>
+.hidden {
+  display: none !important;
+}
 
-      <main class="main-panel">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">Project Request System</p>
-            <h3 id="welcome-name">User</h3>
-          </div>
-          <div class="topbar-actions">
-            <span id="user-role" class="role-pill">User</span>
-            <button id="logout-btn" class="secondary-btn">Logout</button>
-          </div>
-        </header>
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
 
-        <section id="dashboard-view" class="view active">
-          <div class="panel form-panel">
-            <div class="panel-header">
-              <h4>Submit Request</h4>
-              <span class="status-badge green">New</span>
-            </div>
+.auth-card {
+  width: min(100%, 470px);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 26px;
+  padding: 30px;
+  box-shadow: var(--shadow);
+}
 
-            <form id="request-form">
-              <label>
-                Project
-                <select id="project-select" required></select>
-              </label>
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
 
-              <div class="grid-2">
-                <label>
-                  Elevation Style
-                  <select id="elevation-select" required></select>
-                </label>
-                <label>
-                  Project Stage
-                  <select id="stage-select" required></select>
-                </label>
-              </div>
+.auth-badge {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #67a8ff, #2563eb);
+  color: white;
+  font-weight: 800;
+  font-size: 1.5rem;
+}
 
-              <label>
-                Notes
-                <textarea id="request-notes" rows="4" placeholder="Optional notes for the request..."></textarea>
-              </label>
+.auth-card h1 {
+  margin: 0;
+  font-size: 2rem;
+}
 
-              <button class="primary-btn full-width" type="submit">Submit Request</button>
-            </form>
-            <div id="request-message" class="message hidden"></div>
-          </div>
-        </section>
+.mini-label {
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
 
-        <section id="history-view" class="view hidden">
-          <div class="panel">
-            <div class="panel-header">
-              <h4>Request History</h4>
-              <span class="status-badge blue">Live</span>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Ref</th>
-                    <th>Project</th>
-                    <th>Elevation</th>
-                    <th>Stage</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Files</th>
-                  </tr>
-                </thead>
-                <tbody id="history-table-body"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+.auth-subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 1rem;
+}
 
-        <section id="admin-view" class="view hidden">
-          <div class="panel admin-panel">
-            <div class="panel-header">
-              <h4>Project Setup</h4>
-              <span class="status-badge purple">Admin</span>
-            </div>
+.info-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.6;
+}
 
-            <form id="project-form" class="inline-form">
-              <input type="hidden" id="project-id" />
-              <input type="text" id="project-name" placeholder="Project name" required />
-              <input type="text" id="project-code" placeholder="Project code" />
-              <label class="checkbox-label">
-                <input type="checkbox" id="project-active" checked /> Active
-              </label>
-              <button type="submit" class="primary-btn">Save Project</button>
-            </form>
+#login-form,
+#request-form,
+.inline-form {
+  display: grid;
+  gap: 14px;
+}
 
-            <div id="project-list" class="project-list"></div>
-          </div>
+label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 600;
+}
 
-          <div class="panel admin-panel">
-            <div class="panel-header">
-              <h4>User Access</h4>
-              <span class="status-badge purple">Admin</span>
-            </div>
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f9fbff;
+  color: var(--text);
+  padding: 0.82rem 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
 
-            <form id="user-form" class="inline-form">
-              <input type="text" id="user-name" placeholder="User name" required />
-              <input type="email" id="user-email" placeholder="user@email.com" required />
-              <input type="password" id="user-password" placeholder="Password" />
-              <select id="user-role-select">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-              <label class="checkbox-label">
-                <input type="checkbox" id="user-active" checked /> Active
-              </label>
-              <button type="submit" class="primary-btn">Save User</button>
-            </form>
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.6);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+}
 
-            <div id="user-list" class="user-list"></div>
-          </div>
+.primary-btn,
+.secondary-btn,
+.nav-btn,
+.download-btn,
+.small-action {
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
 
-          <div class="panel admin-panel">
-            <div class="panel-header">
-              <h4>Request Queue</h4>
-              <span class="status-badge orange">Monitoring</span>
-            </div>
-            <div id="admin-request-list" class="admin-request-list"></div>
-          </div>
-        </section>
-      </main>
-    </div>
+.primary-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  padding: 0.9rem 1rem;
+  font-weight: 700;
+}
 
-    <script src="/app.js"></script>
-  </body>
-</html>
+.secondary-btn {
+  background: #ebf2ff;
+  color: var(--primary-dark);
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover,
+.nav-btn:hover,
+.download-btn:hover,
+.small-action:hover {
+  transform: translateY(-1px);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-soft) 100%);
+  color: white;
+  padding: 28px 18px;
+}
+
+.brand-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #6aa6ff, #2563eb);
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+
+.brand-box small {
+  display: block;
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.66rem;
+}
+
+.brand-box h2 {
+  margin: 4px 0 0;
+  font-size: 1.7rem;
+}
+
+.nav {
+  display: grid;
+  gap: 10px;
+}
+
+.nav-btn {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.nav-btn.active {
+  background: rgba(148, 163, 184, 0.12);
+  color: white;
+}
+
+.sidebar-panel {
+  margin-top: 26px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  padding: 16px 14px;
+}
+
+.sidebar-label {
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+}
+
+.online-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.15);
+}
+
+.main-panel {
+  padding: 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.topbar h3 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.eyebrow.accent {
+  color: var(--blue);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.role-pill,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.42rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.role-pill {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.status-badge.green {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.status-badge.blue {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.status-badge.purple {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.status-badge.orange {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+
+.view {
+  display: block;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.hero-panel {
+  background: linear-gradient(135deg, #eaf2ff, #ffffff);
+  border: 1px solid var(--line);
+}
+
+.hero-panel h4 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.hero-metrics div {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.hero-metrics span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.hero-metrics strong {
+  font-size: 1.8rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.message {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.94rem;
+}
+
+.message.error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.message.success {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.panel-header h4 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+th {
+  color: var(--muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.inline-form {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.project-list,
+.user-list,
+.admin-request-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.project-card,
+.user-card,
+.request-card {
+  background: var(--panel-alt);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.project-card-header,
+.user-card-header,
+.request-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.project-card h5,
+.user-card h5,
+.request-card h5 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-radius: 999px;
+  padding: 0.36rem 0.72rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  font-size: 0.9rem;
+}
+
+.checkbox-label input {
+  width: auto;
+  margin: 0;
+}
+
+.small-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.52rem 0.8rem;
+  background: var(--purple-soft);
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.request-card .meta,
+.user-card .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.select-status {
+  width: auto;
+  min-width: 150px;
+}
+
+.download-btn {
+  background: var(--green-soft);
+  color: var(--green);
+  padding: 0.55rem 0.8rem;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    padding-bottom: 10px;
+  }
+
+  .inline-form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-panel {
+    padding: 18px 14px 28px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid-2,
+  .inline-form,
+  .hero-metrics {
+    grid-template-columns: 1fr;
+  }
+}
