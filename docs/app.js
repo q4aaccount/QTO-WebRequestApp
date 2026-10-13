@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const formMessage = document.getElementById("form-message");
   const list = document.getElementById("request-list");
 
+  const stages = ["Submitted", "Received", "Work In Progress", "Completed"];
+
   const projectData = {
     "North Tower": {
       elevations: ["Elevation A", "Elevation B", "Elevation C"],
@@ -22,9 +24,27 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const requests = [
-    { project: "North Tower", elevation: "Elevation B", stage: "Working Drawing" },
-    { project: "Harbor Residences", elevation: "Elevation 1", stage: "Design Review" }
+    {
+      project: "North Tower",
+      elevation: "Elevation B",
+      stage: "Work In Progress",
+      eta: "1d 4h remaining"
+    },
+    {
+      project: "Harbor Residences",
+      elevation: "Elevation 1",
+      stage: "Received",
+      eta: "2d 8h remaining"
+    },
+    {
+      project: "Riverfront Campus",
+      elevation: "Premium",
+      stage: "Completed",
+      eta: "0h remaining"
+    }
   ];
+
+  const getStageIndex = (stageName) => stages.indexOf(stageName);
 
   const renderRequests = () => {
     if (!list) return;
@@ -32,17 +52,39 @@ document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = requests
       .slice()
       .reverse()
-      .map(
-        (request) => `
-          <li>
-            <div>
-              <strong>${request.project}</strong>
-              <div class="meta">${request.elevation} • ${request.stage}</div>
+      .map((request) => {
+        const activeIndex = getStageIndex(request.stage);
+
+        const steps = stages
+          .map((step, index) => {
+            const isDone = index < activeIndex;
+            const isCurrent = index === activeIndex;
+            const stateClass = isDone ? "done" : isCurrent ? "current" : "pending";
+
+            return `
+              <div class="process-step ${stateClass}">
+                <span class="step-dot"></span>
+                <span class="step-label">${step}</span>
+              </div>
+            `;
+          })
+          .join("");
+
+        return `
+          <li class="request-item">
+            <div class="request-header">
+              <div>
+                <strong>${request.project}</strong>
+                <div class="request-meta">${request.elevation}</div>
+              </div>
+              <span class="request-eta">ETA: ${request.eta}</span>
             </div>
-            <span class="meta">Submitted</span>
+            <div class="request-process" aria-label="Request process">
+              ${steps}
+            </div>
           </li>
-        `
-      )
+        `;
+      })
       .join("");
   };
 
@@ -57,6 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const updateOptions = () => {
+    if (!projectSelect || !elevationSelect || !stageSelect) return;
+
     const selectedProject = projectSelect.value;
     const selectedData = projectData[selectedProject];
 
@@ -99,7 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const request = {
       project: projectSelect.value,
       elevation: elevationSelect.value,
-      stage: stageSelect.value
+      stage: "Submitted",
+      eta: "3d 6h remaining"
     };
 
     requests.push(request);
