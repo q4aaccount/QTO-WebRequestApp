@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     "Riverfront Campus": {
       elevations: ["Classic", "Modern", "Premium"],
       stages: ["Feasibility", "Concept", "Build"]
+    },
+    "Coastal Plaza": {
+      elevations: ["Elevation South", "Elevation North"],
+      stages: ["Concept", "Development", "Approval"]
     }
   };
 
@@ -41,6 +45,12 @@ document.addEventListener("DOMContentLoaded", () => {
       elevation: "Premium",
       stage: "Completed",
       eta: "0h remaining"
+    },
+    {
+      project: "Coastal Plaza",
+      elevation: "Elevation South",
+      stage: "Submitted",
+      eta: "3d 6h remaining"
     }
   ];
 
