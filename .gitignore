@@ -1,0 +1,522 @@
+const state = {
+  user: null,
+  projects: [],
+  requests: [],
+  adminRequests: []
+};
+
+const authScreen = document.getElementById("auth-screen");
+const appShell = document.getElementById("app-shell");
+const loginForm = document.getElementById("login-form");
+const loginMessage = document.getElementById("login-message");
+const welcomeName = document.getElementById("welcome-name");
+const userRole = document.getElementById("user-role");
+const projectSelect = document.getElementById("project-select");
+const elevationSelect = document.getElementById("elevation-select");
+const stageSelect = document.getElementById("stage-select");
+const requestForm = document.getElementById("request-form");
+const requestMessage = document.getElementById("request-message");
+const projectForm = document.getElementById("project-form");
+const userForm = document.getElementById("user-form");
+const projectList = document.getElementById("project-list");
+const userList = document.getElementById("user-list");
+const adminRequestList = document.getElementById("admin-request-list");
+const historyTableBody = document.getElementById("history-table-body");
+const adminNav = document.getElementById("admin-nav");
+
+async function apiFetch(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    },
+    ...options
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json") ? await response.json() : await response.text();
+
+  if (!response.ok) {
+    const message = typeof data === "string" ? data : data.error || "Request failed";
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+function showMessage(element, text, type = "success") {
+  element.textContent = text;
+  element.className = `message ${type}`;
+  element.classList.remove("hidden");
+}
+
+function hideMessage(element) {
+  element.classList.add("hidden");
+}
+
+function setView(viewName) {
+  document.querySelectorAll(".nav-btn").forEach((button) => {
+    button.classList.toggle("active", button.dataset.view === viewName);
+  });
+
+  document.querySelectorAll(".view").forEach((view) => {
+    view.classList.toggle("hidden", view.id !== `${viewName}-view`);
+  });
+}
+
+function updateAuthUI() {
+  if (!state.user) {
+    authScreen.classList.remove("hidden");
+    appShell.classList.add("hidden");
+    return;
+  }
+
+  authScreen.classList.add("hidden");
+  appShell.classList.remove("hidden");
+  welcomeName.textContent = state.user.name;
+  userRole.textContent = state.user.role === "admin" ? "Admin" : "User";
+  adminNav.classList.toggle("hidden", state.user.role !== "admin");
+  if (state.user.role !== "admin") {
+    setView("dashboard");
+  }
+}
+
+async function fetchCurrentUser() {
+  try {
+    const data = await apiFetch("/api/me");
+    state.user = data.user;
+  } catch (error) {
+    state.user = null;
+  }
+}
+
+function renderProjectSelector() {
+  projectSelect.innerHTML = "<option value=''>Select project</option>";
+
+  state.projects.forEach((project) => {
+    const option = document.createElement("option");
+    option.value = project.id;
+    option.textContent = `${project.name} (${project.code || "No code"})`;
+    projectSelect.appendChild(option);
+  });
+
+  projectSelect.value = state.projects[0]?.id || "";
+  updateElevationAndStageOptions();
+}
+
+function updateElevationAndStageOptions() {
+  const selectedProjectId = projectSelect.value;
+  const project = state.projects.find((item) => item.id === selectedProjectId);
+
+  elevationSelect.innerHTML = "";
+  stageSelect.innerHTML = "";
+
+  if (!project) {
+    const emptyOption = document.createElement("option");
+    emptyOption.textContent = "No project selected";
+    elevationSelect.appendChild(emptyOption);
+    stageSelect.appendChild(emptyOption.cloneNode(true));
+    return;
+  }
+
+  project.elevations.forEach((elevation) => {
+    const option = document.createElement("option");
+    option.value = elevation.id;
+    option.textContent = elevation.name;
+    elevationSelect.appendChild(option);
+  });
+
+  project.stages.forEach((stage) => {
+    const option = document.createElement("option");
+    option.value = stage.id;
+    option.textContent = stage.name;
+    stageSelect.appendChild(option);
+  });
+}
+
+async function loadProjects() {
+  const data = await apiFetch("/api/projects");
+  state.projects = data.projects;
+  renderProjectSelector();
+  renderProjectList();
+}
+
+async function loadRequests() {
+  const data = await apiFetch("/api/requests");
+  state.requests = data.requests;
+  renderHistoryTable();
+}
+
+async function loadAdminRequests() {
+  const data = await apiFetch("/api/admin/requests");
+  state.adminRequests = data.requests;
+  renderAdminRequestList();
+}
+
+function renderHistoryTable() {
+  historyTableBody.innerHTML = "";
+
+  if (state.requests.length === 0) {
+    historyTableBody.innerHTML = `<tr><td colspan="7">No requests submitted yet.</td></tr>`;
+    return;
+  }
+
+  state.requests.forEach((request) => {
+    const row = document.createElement("tr");
+
+    const statusClass = request.status === "completed" ? "green" : request.status === "in_progress" ? "blue" : request.status === "rejected" ? "red" : "orange";
+
+    row.innerHTML = `
+      <td>${request.request_no}</td>
+      <td>${request.project_name || "-"}</td>
+      <td>${request.elevation_name || "-"}</td>
+      <td>${request.stage_name || "-"}</td>
+      <td><span class="status-badge ${statusClass}">${request.status}</span></td>
+      <td>${new Date(request.created_at).toLocaleDateString()}</td>
+      <td>
+        ${request.file_count > 0 ? `<button class="download-btn" data-download="${request.id}">Download</button>` : "-"}
+      </td>
+    `;
+
+    historyTableBody.appendChild(row);
+  });
+
+  document.querySelectorAll("[data-download]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const requestId = button.getAttribute("data-download");
+      const files = await apiFetch(`/api/requests/${requestId}/files`);
+      if (!files.files || files.files.length === 0) {
+        return;
+      }
+
+      files.files.forEach((file) => {
+        const a = document.createElement("a");
+        a.href = file.download_url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.click();
+      });
+    });
+  });
+}
+
+function renderProjectList() {
+  projectList.innerHTML = "";
+
+  state.projects.forEach((project) => {
+    const card = document.createElement("div");
+    card.className = "project-card";
+    card.innerHTML = `
+      <div class="project-card-header">
+        <h5>${project.name}</h5>
+        <button class="small-action" data-project-edit="${project.id}">Edit</button>
+      </div>
+      <div class="chip-list">
+        ${project.elevations.map((e) => `<span class="chip">${e.name}</span>`).join("") || "<span class='chip'>No elevations</span>"}
+      </div>
+      <div class="chip-list">
+        ${project.stages.map((s) => `<span class="chip">${s.name}</span>`).join("") || "<span class='chip'>No stages</span>"}
+      </div>
+      <form class="inline-form" data-project-form="${project.id}">
+        <input type="text" name="elevation" placeholder="Add elevation" />
+        <button type="submit" class="small-action">Add Elevation</button>
+      </form>
+      <form class="inline-form" data-project-stage-form="${project.id}">
+        <input type="text" name="stage" placeholder="Add stage" />
+        <button type="submit" class="small-action">Add Stage</button>
+      </form>
+    `;
+
+    projectList.appendChild(card);
+  });
+
+  document.querySelectorAll("[data-project-edit]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const project = state.projects.find((item) => item.id === button.dataset.projectEdit);
+      if (!project) return;
+      document.getElementById("project-id").value = project.id;
+      document.getElementById("project-name").value = project.name;
+      document.getElementById("project-code").value = project.code || "";
+      document.getElementById("project-active").checked = Boolean(project.is_active);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  document.querySelectorAll("[data-project-form]").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const projectId = form.dataset.projectForm;
+      const name = form.querySelector("input[name='elevation']").value.trim();
+      if (!name) return;
+      await apiFetch(`/api/admin/projects/${projectId}/elevations`, {
+        method: "POST",
+        body: JSON.stringify({ name })
+      });
+      await loadProjects();
+    });
+  });
+
+  document.querySelectorAll("[data-project-stage-form]").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const projectId = form.dataset.projectStageForm;
+      const name = form.querySelector("input[name='stage']").value.trim();
+      if (!name) return;
+      await apiFetch(`/api/admin/projects/${projectId}/stages`, {
+        method: "POST",
+        body: JSON.stringify({ name })
+      });
+      await loadProjects();
+    });
+  });
+}
+
+async function loadUsers() {
+  if (state.user?.role !== "admin") return;
+  const data = await apiFetch("/api/admin/users");
+  renderUsers(data.users);
+}
+
+function renderUsers(users) {
+  userList.innerHTML = "";
+
+  users.forEach((user) => {
+    const card = document.createElement("div");
+    card.className = "user-card";
+    card.innerHTML = `
+      <div class="user-card-header">
+        <h5>${user.name}</h5>
+        <span class="status-badge ${user.role === "admin" ? "purple" : "blue"}">${user.role}</span>
+      </div>
+      <div>${user.email}</div>
+      <div class="meta">
+        <span>${user.is_active ? "Active" : "Inactive"}</span>
+      </div>
+    `;
+    userList.appendChild(card);
+  });
+}
+
+function renderAdminRequestList() {
+  adminRequestList.innerHTML = "";
+
+  state.adminRequests.forEach((request) => {
+    const card = document.createElement("div");
+    card.className = "request-card";
+    card.innerHTML = `
+      <div class="request-card-header">
+        <h5>${request.request_no}</h5>
+        <span class="status-badge ${request.status === "completed" ? "green" : request.status === "submitted" ? "orange" : "blue"}">${request.status}</span>
+      </div>
+      <div>${request.project_name} / ${request.elevation_name} / ${request.stage_name}</div>
+      <div class="meta">
+        <span>Requested by: ${request.requested_by_name || "-"}</span>
+      </div>
+      <div class="meta">
+        <select class="select-status" data-status-id="${request.id}">
+          <option value="submitted" ${request.status === "submitted" ? "selected" : ""}>Submitted</option>
+          <option value="in_progress" ${request.status === "in_progress" ? "selected" : ""}>In Progress</option>
+          <option value="completed" ${request.status === "completed" ? "selected" : ""}>Completed</option>
+          <option value="rejected" ${request.status === "rejected" ? "selected" : ""}>Rejected</option>
+        </select>
+        <button class="small-action" data-status-update="${request.id}">Update</button>
+      </div>
+      <div class="meta">
+        <form enctype="multipart/form-data" data-file-upload="${request.id}">
+          <input type="file" name="files" multiple />
+          <button type="submit" class="small-action">Upload Files</button>
+        </form>
+      </div>
+    `;
+    adminRequestList.appendChild(card);
+  });
+
+  document.querySelectorAll("[data-status-update]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const requestId = button.dataset.statusUpdate;
+      const status = document.querySelector(`[data-status-id="${requestId}"]`).value;
+      await apiFetch(`/api/admin/requests/${requestId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status })
+      });
+      await loadAdminRequests();
+    });
+  });
+
+  document.querySelectorAll("[data-file-upload]").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const requestId = form.dataset.fileUpload;
+      const fileInput = form.querySelector('input[type="file"]');
+      if (!fileInput.files.length) {
+        return;
+      }
+
+      const formData = new FormData();
+      Array.from(fileInput.files).forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const response = await fetch(`/api/admin/requests/${requestId}/files`, {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({ error: "Upload failed" }));
+        throw new Error(data.error || "Upload failed");
+      }
+
+      await loadAdminRequests();
+      await loadRequests();
+    });
+  });
+}
+
+async function submitRequest(event) {
+  event.preventDefault();
+  const projectId = projectSelect.value;
+  const elevationId = elevationSelect.value;
+  const stageId = stageSelect.value;
+  const notes = document.getElementById("request-notes").value;
+
+  try {
+    await apiFetch("/api/requests", {
+      method: "POST",
+      body: JSON.stringify({
+        project_id: projectId,
+        elevation_id: elevationId,
+        stage_id: stageId,
+        notes
+      })
+    });
+
+    showMessage(requestMessage, "Request submitted successfully.", "success");
+    requestForm.reset();
+    await loadRequests();
+  } catch (error) {
+    showMessage(requestMessage, error.message, "error");
+  }
+}
+
+async function handleLogin(event) {
+  event.preventDefault();
+  const formData = new FormData(loginForm);
+  const payload = {
+    email: formData.get("email"),
+    password: formData.get("password")
+  };
+
+  try {
+    const result = await apiFetch("/api/login", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    state.user = result.user;
+    updateAuthUI();
+    await loadProjects();
+    await loadRequests();
+    if (state.user.role === "admin") {
+      await loadAdminRequests();
+      await loadUsers();
+    }
+  } catch (error) {
+    showMessage(loginMessage, error.message, "error");
+  }
+}
+
+async function handleLogout() {
+  await apiFetch("/api/logout", { method: "POST" });
+  state.user = null;
+  state.projects = [];
+  state.requests = [];
+  state.adminRequests = [];
+  updateAuthUI();
+  hideMessage(loginMessage);
+}
+
+async function handleProjectSubmit(event) {
+  event.preventDefault();
+
+  const projectId = document.getElementById("project-id").value;
+  const name = document.getElementById("project-name").value.trim();
+  const code = document.getElementById("project-code").value.trim();
+  const isActive = document.getElementById("project-active").checked;
+
+  try {
+    await apiFetch("/api/admin/projects", {
+      method: "POST",
+      body: JSON.stringify({ id: projectId || undefined, name, code, is_active: isActive })
+    });
+    projectForm.reset();
+    document.getElementById("project-id").value = "";
+    document.getElementById("project-active").checked = true;
+    await loadProjects();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function handleUserSubmit(event) {
+  event.preventDefault();
+
+  const payload = {
+    name: document.getElementById("user-name").value.trim(),
+    email: document.getElementById("user-email").value.trim(),
+    password: document.getElementById("user-password").value,
+    role: document.getElementById("user-role-select").value,
+    is_active: document.getElementById("user-active").checked
+  };
+
+  try {
+    await apiFetch("/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    userForm.reset();
+    document.getElementById("user-active").checked = true;
+    await loadUsers();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+async function initialize() {
+  loginForm.addEventListener("submit", handleLogin);
+  document.getElementById("logout-btn").addEventListener("click", handleLogout);
+  requestForm.addEventListener("submit", submitRequest);
+  projectForm.addEventListener("submit", handleProjectSubmit);
+  userForm.addEventListener("submit", handleUserSubmit);
+  projectSelect.addEventListener("change", updateElevationAndStageOptions);
+
+  document.querySelectorAll(".nav-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (state.user && state.user.role !== "admin" && button.dataset.view === "admin") {
+        return;
+      }
+      setView(button.dataset.view);
+    });
+  });
+
+  await fetchCurrentUser();
+  updateAuthUI();
+
+  if (state.user) {
+    await loadProjects();
+    await loadRequests();
+    if (state.user.role === "admin") {
+      await loadAdminRequests();
+      await loadUsers();
+    }
+  }
+}
+
+initialize();
+
+window.addEventListener("load", () => {
+  document.getElementById("project-active").checked = true;
+  document.getElementById("user-active").checked = true;
+});
