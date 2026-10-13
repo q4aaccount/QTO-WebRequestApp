@@ -3,215 +3,70 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QTO Project Request Portal</title>
+    <title>QTO Request Portal</title>
     <meta
       name="description"
-      content="QTO project request portal for project selection, elevation styles, project stages, and historical requests."
+      content="Simple project request form with project selection, elevation style, and project stage."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div id="auth-screen" class="auth-shell">
-      <div class="auth-card">
-        <div class="auth-brand">
-          <div class="auth-badge">Q</div>
-          <div>
-            <p class="mini-label">Project Control</p>
-            <h1>QTO</h1>
-          </div>
-        </div>
-
-        <p class="auth-subtitle">Request portal for project styles and stage submissions.</p>
-
-        <div class="info-box">
-          <strong>Demo access</strong><br />
-          Email: <span>admin@qto.local</span><br />
-          Password: <span>Admin123!</span>
-        </div>
-
-        <form id="login-form">
-          <label>
-            Email address
-            <input type="email" name="email" placeholder="admin@qto.local" required />
-          </label>
-          <label>
-            Password
-            <input type="password" name="password" placeholder="Enter password" required />
-          </label>
-          <button type="submit" class="primary-btn">Sign in</button>
-        </form>
-
-        <div id="login-message" class="message hidden"></div>
-      </div>
-    </div>
-
-    <div id="app-shell" class="app-shell hidden">
+    <div class="page-shell">
       <aside class="sidebar">
-        <div class="brand-box">
+        <div class="brand">
           <div class="brand-mark">Q</div>
           <div>
-            <small>Project Control</small>
-            <h2>QTO</h2>
-          </div>
-        </div>
-
-        <nav class="nav">
-          <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-          <button class="nav-btn" data-view="history">History</button>
-          <button class="nav-btn" data-view="admin">Admin</button>
-        </nav>
-
-        <div class="sidebar-panel">
-          <p class="sidebar-label">System</p>
-          <div class="online-row">
-            <span class="pulse"></span>
-            <span>Operational</span>
+            <span class="eyebrow">Project control</span>
+            <h1>QTO</h1>
           </div>
         </div>
       </aside>
 
-      <main class="main-panel">
+      <main class="content">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Project request system</p>
-            <h3 id="welcome-name">User</h3>
-          </div>
-          <div class="topbar-actions">
-            <span id="user-role" class="role-pill">User</span>
-            <button id="logout-btn" class="secondary-btn">Logout</button>
+            <p class="eyebrow">Request intake</p>
+            <h2>New project request</h2>
           </div>
         </header>
 
-        <section id="dashboard-view" class="view active">
-          <div class="hero-panel panel">
-            <div>
-              <p class="eyebrow accent">Request intake</p>
-              <h4>Submit a project request</h4>
-            </div>
-            <div class="hero-metrics">
-              <div>
-                <span>Open items</span>
-                <strong id="open-count">0</strong>
-              </div>
-              <div>
-                <span>Completed</span>
-                <strong id="completed-count">0</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel form-panel">
-            <div class="panel-header">
-              <h4>Project details</h4>
-              <span class="status-badge green">New</span>
-            </div>
-
-            <form id="request-form">
-              <label>
-                Project
-                <select id="project-select" required></select>
-              </label>
-
-              <div class="grid-2">
-                <label>
-                  Elevation style
-                  <select id="elevation-select" required></select>
-                </label>
-                <label>
-                  Project stage
-                  <select id="stage-select" required></select>
-                </label>
-              </div>
-
-              <label>
-                Notes
-                <textarea id="request-notes" rows="4" placeholder="Optional notes for this request..."></textarea>
-              </label>
-
-              <button class="primary-btn full-width" type="submit">Submit request</button>
-            </form>
-            <div id="request-message" class="message hidden"></div>
-          </div>
-        </section>
-
-        <section id="history-view" class="view hidden">
-          <div class="panel">
-            <div class="panel-header">
-              <h4>Request history</h4>
-              <span class="status-badge blue">Live</span>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Ref</th>
-                    <th>Project</th>
-                    <th>Elevation</th>
-                    <th>Stage</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Files</th>
-                  </tr>
-                </thead>
-                <tbody id="history-table-body"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        <section id="admin-view" class="view hidden">
-          <div class="panel admin-panel">
-            <div class="panel-header">
-              <h4>Project setup</h4>
-              <span class="status-badge purple">Admin</span>
-            </div>
-
-            <form id="project-form" class="inline-form">
-              <input type="hidden" id="project-id" />
-              <input type="text" id="project-name" placeholder="Project name" required />
-              <input type="text" id="project-code" placeholder="Project code" />
-              <label class="checkbox-label">
-                <input type="checkbox" id="project-active" checked /> Active
-              </label>
-              <button type="submit" class="primary-btn">Save project</button>
-            </form>
-
-            <div id="project-list" class="project-list"></div>
-          </div>
-
-          <div class="panel admin-panel">
-            <div class="panel-header">
-              <h4>User access</h4>
-              <span class="status-badge purple">Admin</span>
-            </div>
-
-            <form id="user-form" class="inline-form">
-              <input type="text" id="user-name" placeholder="User name" required />
-              <input type="email" id="user-email" placeholder="user@email.com" required />
-              <input type="password" id="user-password" placeholder="Password" />
-              <select id="user-role-select">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+        <section class="panel">
+          <form id="request-form" class="request-form">
+            <label>
+              Project
+              <select id="project-select" required>
+                <option value="">Select a project</option>
               </select>
-              <label class="checkbox-label">
-                <input type="checkbox" id="user-active" checked /> Active
-              </label>
-              <button type="submit" class="primary-btn">Save user</button>
-            </form>
+            </label>
 
-            <div id="user-list" class="user-list"></div>
-          </div>
+            <label>
+              Elevation style
+              <select id="elevation-select" required>
+                <option value="">Select an elevation style</option>
+              </select>
+            </label>
 
-          <div class="panel admin-panel">
-            <div class="panel-header">
-              <h4>Request queue</h4>
-              <span class="status-badge orange">Monitoring</span>
-            </div>
-            <div id="admin-request-list" class="admin-request-list"></div>
+            <label>
+              Project stage
+              <select id="project-stage" required>
+                <option value="">Select a stage</option>
+              </select>
+            </label>
+
+            <button type="submit" class="primary-button">Submit request</button>
+          </form>
+
+          <div id="form-message" class="message hidden" aria-live="polite"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Recent requests</h3>
           </div>
+          <ul id="request-list" class="request-list" aria-live="polite"></ul>
         </section>
       </main>
     </div>

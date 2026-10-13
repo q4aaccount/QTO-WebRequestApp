@@ -3,196 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QTO Web Request App</title>
+    <title>QTO Request Portal</title>
     <meta
       name="description"
-      content="QTO Web Request App dashboard for tracking and managing incoming web requests."
+      content="Simple project request form with project selection, elevation style, and project stage."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="page-shell">
       <aside class="sidebar">
-        <div class="brand-block">
+        <div class="brand">
           <div class="brand-mark">Q</div>
           <div>
-            <p class="eyebrow">Automation Suite</p>
+            <span class="eyebrow">Project control</span>
             <h1>QTO</h1>
           </div>
-        </div>
-
-        <nav class="nav" aria-label="Main navigation">
-          <a class="nav-link active" href="#overview">Overview</a>
-          <a class="nav-link" href="#requests">Requests</a>
-          <a class="nav-link" href="#settings">Settings</a>
-        </nav>
-
-        <div class="sidebar-card">
-          <p class="card-label">System Health</p>
-          <div class="status-row">
-            <span class="status-dot success"></span>
-            <span>Operational</span>
-          </div>
-          <p class="muted">99.9% uptime this month</p>
         </div>
       </aside>
 
       <main class="content">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Web Request Center</p>
-            <h2>QTO Web Request App</h2>
+            <p class="eyebrow">Request intake</p>
+            <h2>New project request</h2>
           </div>
-          <button class="primary-button" type="button">+ New Request</button>
         </header>
 
-        <section class="hero" id="overview">
-          <div class="hero-copy">
-            <p class="pill">Live Queue</p>
-            <h3>Manage incoming web requests with speed and clarity.</h3>
-            <p>
-              Centralize new submissions, track response time, and keep every request moving from intake to completion.
-            </p>
-            <div class="hero-actions">
-              <button class="primary-button" type="button">Submit Request</button>
-              <button class="secondary-button" type="button">View Queue</button>
-            </div>
-          </div>
+        <section class="panel">
+          <form id="request-form" class="request-form">
+            <label>
+              Project
+              <select id="project-select" required>
+                <option value="">Select a project</option>
+              </select>
+            </label>
 
-          <div class="hero-panel">
-            <div class="mini-chart">
-              <div class="bar bar-1"></div>
-              <div class="bar bar-2"></div>
-              <div class="bar bar-3"></div>
-              <div class="bar bar-4"></div>
-              <div class="bar bar-5"></div>
-              <div class="bar bar-6"></div>
-            </div>
-            <div class="panel-stats">
-              <div>
-                <span class="stat-label">Open Requests</span>
-                <strong>184</strong>
-              </div>
-              <div>
-                <span class="stat-label">Avg. SLA</span>
-                <strong>2.4h</strong>
-              </div>
-            </div>
-          </div>
+            <label>
+              Elevation style
+              <select id="elevation-select" required>
+                <option value="">Select an elevation style</option>
+              </select>
+            </label>
+
+            <label>
+              Project stage
+              <select id="project-stage" required>
+                <option value="">Select a stage</option>
+              </select>
+            </label>
+
+            <button type="submit" class="primary-button">Submit request</button>
+          </form>
+
+          <div id="form-message" class="message hidden" aria-live="polite"></div>
         </section>
 
-        <section class="metrics" aria-label="Key metrics">
-          <article class="metric-card accent">
-            <span class="metric-label">Completed Today</span>
-            <strong>67</strong>
-            <small>+12.4% vs yesterday</small>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">In Progress</span>
-            <strong>41</strong>
-            <small>11 urgent items</small>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Pending Review</span>
-            <strong>18</strong>
-            <small>3 blocked by approval</small>
-          </article>
-          <article class="metric-card">
-            <span class="metric-label">Resolution Rate</span>
-            <strong>96%</strong>
-            <small>Above target</small>
-          </article>
-        </section>
-
-        <section class="main-grid" id="requests">
-          <div class="panel request-form-panel">
-            <div class="panel-header">
-              <h3>New Request</h3>
-              <span class="badge">Fast Entry</span>
-            </div>
-
-            <form id="request-form">
-              <div class="field-row">
-                <label>
-                  Request Name
-                  <input type="text" id="request-name" placeholder="Customer account update" required />
-                </label>
-              </div>
-
-              <div class="field-row two-up">
-                <label>
-                  Category
-                  <select id="request-category">
-                    <option>Operations</option>
-                    <option>Support</option>
-                    <option>Finance</option>
-                    <option>Technical</option>
-                  </select>
-                </label>
-
-                <label>
-                  Priority
-                  <select id="request-priority">
-                    <option>Low</option>
-                    <option selected>Medium</option>
-                    <option>High</option>
-                    <option>Critical</option>
-                  </select>
-                </label>
-              </div>
-
-              <label>
-                Details
-                <textarea id="request-details" rows="4" placeholder="Describe the requested task and any relevant notes..."></textarea>
-              </label>
-
-              <button type="submit" class="primary-button full-width">Submit Request</button>
-            </form>
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Recent requests</h3>
           </div>
-
-          <div class="panel request-list-panel">
-            <div class="panel-header">
-              <h3>Recent Requests</h3>
-              <span class="badge soft">Updated now</span>
-            </div>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>Request</th>
-                  <th>Owner</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="request-table-body">
-                <tr>
-                  <td>Invoice sync check</td>
-                  <td>J. Smith</td>
-                  <td><span class="status-tag in-progress">In progress</span></td>
-                </tr>
-                <tr>
-                  <td>Customer onboarding</td>
-                  <td>A. Lee</td>
-                  <td><span class="status-tag review">Review</span></td>
-                </tr>
-                <tr>
-                  <td>Access request refresh</td>
-                  <td>M. Patel</td>
-                  <td><span class="status-tag done">Done</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <ul id="request-list" class="request-list" aria-live="polite"></ul>
         </section>
       </main>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/app.js"></script>
   </body>
 </html>
