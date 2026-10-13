@@ -1,1 +1,1 @@
-// Deprecated: the source of truth is docs/.
+// Deprecated: docs/app.js is the active source for the deployment page.
