@@ -44,17 +44,33 @@
 
             <label>
               Elevation style
-              <select id="elevation-select" required>
-                <option value="">Select an elevation style</option>
+              <select id="elevation-select" multiple size="5" required>
+                <option value="">Select one or more elevation styles</option>
               </select>
             </label>
 
             <label>
-              Project stage
-              <select id="project-stage" required>
-                <option value="">Select a stage</option>
+              Exterior / Interior
+              <select id="scope-select" multiple size="4" required>
+                <option value="Interior">Interior</option>
+                <option value="Exterior">Exterior</option>
+                <option value="Both">Both</option>
               </select>
             </label>
+
+            <div id="interior-options-wrapper" class="hidden">
+              <label>
+                Interior options
+                <select id="interior-options" multiple size="5">
+                  <option value="Cabinets">Cabinets</option>
+                  <option value="Countertops">Countertops</option>
+                  <option value="Flooring">Flooring</option>
+                  <option value="Paint">Paint</option>
+                  <option value="Trim">Trim</option>
+                  <option value="Lighting">Lighting</option>
+                </select>
+              </label>
+            </div>
 
             <button type="submit" class="primary-button">Submit request</button>
           </form>
