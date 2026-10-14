@@ -32,54 +32,85 @@
           </div>
         </header>
 
-        <section class="panel">
-          <form id="request-form" class="request-form">
-            <label>
-              Project
-              <select id="project-select" required>
-                <option value="">Select a project</option>
-              </select>
-            </label>
-
-            <label>
-              Elevation style
-              <select id="elevation-select" required>
-                <option value="">Select an elevation style</option>
-              </select>
-            </label>
-
-            <label>
-              Exterior / Interior
-              <select id="scope-select" required>
-                <option value="">Select an option</option>
-                <option value="Interior">Interior</option>
-                <option value="Exterior">Exterior</option>
-                <option value="Both">Both</option>
-              </select>
-            </label>
-
-            <div id="interior-options-wrapper" class="hidden">
+        <section class="workspace">
+          <section class="panel request-panel">
+            <form id="request-form" class="request-form">
               <label>
-                Interior options
-                <select id="interior-options">
-                  <option value="">Select an interior option</option>
-                  <option value="Cabinets">Cabinets</option>
-                  <option value="Countertops">Countertops</option>
-                  <option value="Flooring">Flooring</option>
-                  <option value="Paint">Paint</option>
-                  <option value="Trim">Trim</option>
-                  <option value="Lighting">Lighting</option>
+                Project
+                <select id="project-select" required>
+                  <option value="">Select a project</option>
                 </select>
               </label>
+
+              <label>
+                Elevation style
+                <select id="elevation-select" required>
+                  <option value="">Select an elevation style</option>
+                </select>
+              </label>
+
+              <label>
+                Exterior / Interior
+                <select id="scope-select" required>
+                  <option value="">Select an option</option>
+                  <option value="Interior">Interior</option>
+                  <option value="Exterior">Exterior</option>
+                  <option value="Both">Both</option>
+                </select>
+              </label>
+
+              <div id="interior-options-wrapper" class="hidden">
+                <label>
+                  Interior options
+                  <select id="interior-options">
+                    <option value="">Select an interior option</option>
+                    <option value="Cabinets">Cabinets</option>
+                    <option value="Countertops">Countertops</option>
+                    <option value="Flooring">Flooring</option>
+                    <option value="Paint">Paint</option>
+                    <option value="Trim">Trim</option>
+                    <option value="Lighting">Lighting</option>
+                  </select>
+                </label>
+              </div>
+
+              <button type="submit" class="primary-button">Submit request</button>
+            </form>
+
+            <div id="form-message" class="message hidden" aria-live="polite"></div>
+          </section>
+
+          <aside class="gallery-panel" aria-label="Project reference images">
+            <div class="gallery-header">
+              <p class="eyebrow eyebrow-dark">Reference</p>
+              <h3>Elevation concepts</h3>
             </div>
 
-            <button type="submit" class="primary-button">Submit request</button>
-          </form>
+            <div class="photo-card">
+              <img
+                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80"
+                alt="Modern home front elevation"
+              />
+              <div class="photo-caption">
+                <strong>Front elevation</strong>
+                <p>Balanced windows, clean lines, and a warm modern exterior.</p>
+              </div>
+            </div>
 
-          <div id="form-message" class="message hidden" aria-live="polite"></div>
+            <div class="photo-card">
+              <img
+                src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=900&q=80"
+                alt="Contemporary residential facade"
+              />
+              <div class="photo-caption">
+                <strong>Side elevation</strong>
+                <p>Low-profile rooflines and a subtle contrast between materials.</p>
+              </div>
+            </div>
+          </aside>
         </section>
 
-        <section class="panel">
+        <section class="panel request-list-panel">
           <div class="panel-header">
             <h3>Recent requests</h3>
           </div>
