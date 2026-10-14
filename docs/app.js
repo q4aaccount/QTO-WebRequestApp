@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const interiorOptions = document.getElementById("interior-options");
   const form = document.getElementById("request-form");
   const formMessage = document.getElementById("form-message");
-  const list = document.getElementById("request-list");
   const historyList = document.getElementById("history-request-list");
   const slideshow = document.querySelector("[data-slideshow]");
   const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
@@ -55,28 +54,23 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const renderRequests = () => {
-    const renderToList = (targetList) => {
-      if (!targetList) return;
+    if (!historyList) return;
 
-      targetList.innerHTML = requests
-        .slice()
-        .reverse()
-        .map((request) => `
-          <li class="request-item">
-            <div class="request-header">
-              <div>
-                <strong>${request.project}</strong>
-                <div class="request-meta">${request.elevation} • ${request.scope}</div>
-              </div>
-              <span class="request-eta">ETA: ${request.eta}</span>
+    historyList.innerHTML = requests
+      .slice()
+      .reverse()
+      .map((request) => `
+        <li class="request-item">
+          <div class="request-header">
+            <div>
+              <strong>${request.project}</strong>
+              <div class="request-meta">${request.elevation} • ${request.scope}</div>
             </div>
-          </li>
-        `)
-        .join("");
-    };
-
-    renderToList(list);
-    renderToList(historyList);
+            <span class="request-eta">ETA: ${request.eta}</span>
+          </div>
+        </li>
+      `)
+      .join("");
   };
 
   const populateProjects = () => {
