@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const formMessage = document.getElementById("form-message");
   const list = document.getElementById("request-list");
   const slideshow = document.querySelector("[data-slideshow]");
+  const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
+  const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
 
   const projectData = {
     "North Tower": {
@@ -109,6 +111,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const setActiveTab = (tabName) => {
+    tabButtons.forEach((button) => {
+      const isActive = button.dataset.tab === tabName;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-selected", String(isActive));
+    });
+
+    tabPanels.forEach((panel) => {
+      const isActive = panel.dataset.panel === tabName;
+      panel.classList.toggle("is-active", isActive);
+    });
+  };
+
   const initSlideshow = () => {
     if (!slideshow) return;
 
@@ -159,6 +174,10 @@ document.addEventListener("DOMContentLoaded", () => {
     start();
   };
 
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => setActiveTab(button.dataset.tab));
+  });
+
   if (projectSelect) {
     populateProjects();
     projectSelect.addEventListener("change", updateOptions);
@@ -169,6 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   renderRequests();
+  setActiveTab("home");
   updateOptions();
   updateInteriorOptions();
   initSlideshow();
