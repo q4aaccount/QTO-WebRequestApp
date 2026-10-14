@@ -1,29 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
   const projectSelect = document.getElementById("project-select");
   const elevationSelect = document.getElementById("elevation-select");
-  const stageSelect = document.getElementById("project-stage");
+  const scopeSelect = document.getElementById("scope-select");
+  const interiorOptionsWrapper = document.getElementById("interior-options-wrapper");
+  const interiorOptions = document.getElementById("interior-options");
   const form = document.getElementById("request-form");
   const formMessage = document.getElementById("form-message");
   const list = document.getElementById("request-list");
 
-  const stages = ["Submitted", "Received", "Work In Progress", "Completed"];
-
   const projectData = {
     "North Tower": {
-      elevations: ["Elevation A", "Elevation B", "Elevation C"],
-      stages: ["Schematic Design", "Working Drawing", "Construction Documentation"]
+      elevations: ["Elevation A", "Elevation B", "Elevation C"]
     },
     "Harbor Residences": {
-      elevations: ["Elevation 1", "Elevation 2"],
-      stages: ["Planning", "Design Review", "Tender"]
+      elevations: ["Elevation 1", "Elevation 2"]
     },
     "Riverfront Campus": {
-      elevations: ["Classic", "Modern", "Premium"],
-      stages: ["Feasibility", "Concept", "Build"]
+      elevations: ["Classic", "Modern", "Premium"]
     },
     "Coastal Plaza": {
-      elevations: ["Elevation South", "Elevation North"],
-      stages: ["Concept", "Development", "Approval"]
+      elevations: ["Elevation South", "Elevation North"]
     }
   };
 
@@ -31,30 +27,28 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       project: "North Tower",
       elevation: "Elevation B",
-      stage: "Work In Progress",
+      scope: "Exterior",
       eta: "1d 4h remaining"
     },
     {
       project: "Harbor Residences",
       elevation: "Elevation 1",
-      stage: "Received",
+      scope: "Interior",
       eta: "2d 8h remaining"
     },
     {
       project: "Riverfront Campus",
       elevation: "Premium",
-      stage: "Completed",
+      scope: "Both",
       eta: "0h remaining"
     },
     {
       project: "Coastal Plaza",
       elevation: "Elevation South",
-      stage: "Submitted",
+      scope: "Exterior",
       eta: "3d 6h remaining"
     }
   ];
-
-  const getStageIndex = (stageName) => stages.indexOf(stageName);
 
   const renderRequests = () => {
     if (!list) return;
@@ -62,39 +56,17 @@ document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = requests
       .slice()
       .reverse()
-      .map((request) => {
-        const activeIndex = getStageIndex(request.stage);
-
-        const steps = stages
-          .map((step, index) => {
-            const isDone = index < activeIndex;
-            const isCurrent = index === activeIndex;
-            const stateClass = isDone ? "done" : isCurrent ? "current" : "pending";
-
-            return `
-              <div class="process-step ${stateClass}">
-                <span class="step-dot"></span>
-                <span class="step-label">${step}</span>
-              </div>
-            `;
-          })
-          .join("");
-
-        return `
-          <li class="request-item">
-            <div class="request-header">
-              <div>
-                <strong>${request.project}</strong>
-                <div class="request-meta">${request.elevation}</div>
-              </div>
-              <span class="request-eta">ETA: ${request.eta}</span>
+      .map((request) => `
+        <li class="request-item">
+          <div class="request-header">
+            <div>
+              <strong>${request.project}</strong>
+              <div class="request-meta">${request.elevation} • ${request.scope}</div>
             </div>
-            <div class="request-process" aria-label="Request process">
-              ${steps}
-            </div>
-          </li>
-        `;
-      })
+            <span class="request-eta">ETA: ${request.eta}</span>
+          </div>
+        </li>
+      `)
       .join("");
   };
 
@@ -108,14 +80,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const updateInteriorOptions = () => {
+    if (!scopeSelect || !interiorOptionsWrapper || !interiorOptions) return;
+
+    const selectedScope = scopeSelect.value;
+    const showInterior = selectedScope === "Interior" || selectedScope === "Both";
+
+    interiorOptionsWrapper.classList.toggle("hidden", !showInterior);
+    interiorOptions.required = showInterior;
+  };
+
   const updateOptions = () => {
-    if (!projectSelect || !elevationSelect || !stageSelect) return;
+    if (!projectSelect || !elevationSelect) return;
 
     const selectedProject = projectSelect.value;
     const selectedData = projectData[selectedProject];
 
     elevationSelect.innerHTML = '<option value="">Select an elevation style</option>';
-    stageSelect.innerHTML = '<option value="">Select a stage</option>';
 
     if (!selectedData) return;
 
@@ -125,13 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
       option.textContent = value;
       elevationSelect.appendChild(option);
     });
-
-    selectedData.stages.forEach((value) => {
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = value;
-      stageSelect.appendChild(option);
-    });
   };
 
   if (projectSelect) {
@@ -139,32 +113,50 @@ document.addEventListener("DOMContentLoaded", () => {
     projectSelect.addEventListener("change", updateOptions);
   }
 
+  if (scopeSelect) {
+    scopeSelect.addEventListener("change", updateInteriorOptions);
+  }
+
   renderRequests();
+  updateOptions();
+  updateInteriorOptions();
 
   form?.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    if (!projectSelect.value || !elevationSelect.value || !stageSelect.value) {
-      formMessage.textContent = "Please select a project, elevation style, and project stage.";
+    if (!projectSelect || !elevationSelect || !scopeSelect) return;
+
+    if (!projectSelect.value || !elevationSelect.value || !scopeSelect.value) {
+      formMessage.textContent = "Please select a project, elevation style, and interior/exterior option.";
       formMessage.classList.remove("hidden");
       return;
+    }
+
+    if (scopeSelect.value === "Interior" || scopeSelect.value === "Both") {
+      if (!interiorOptions || !interiorOptions.value) {
+        formMessage.textContent = "Please choose an interior option.";
+        formMessage.classList.remove("hidden");
+        return;
+      }
     }
 
     const request = {
       project: projectSelect.value,
       elevation: elevationSelect.value,
-      stage: "Submitted",
+      scope: scopeSelect.value,
       eta: "3d 6h remaining"
     };
 
     requests.push(request);
     renderRequests();
 
-    formMessage.textContent = `Request submitted for ${request.project} • ${request.elevation} • ${request.stage}.`;
+    formMessage.textContent = `Request submitted for ${request.project} • ${request.elevation} • ${request.scope}.`;
     formMessage.classList.remove("hidden");
 
     form.reset();
     projectSelect.selectedIndex = 0;
+    scopeSelect.selectedIndex = 0;
     updateOptions();
+    updateInteriorOptions();
   });
 });
