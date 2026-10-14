@@ -1,3 +1,21 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { 
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  where
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const projectSelect = document.getElementById("project-select");
   const elevationSelect = document.getElementById("elevation-select");
@@ -11,6 +29,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const galleryTitle = document.getElementById("gallery-title");
   const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
   const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
+  const authForm = document.getElementById("auth-form");
+  const authTitle = document.getElementById("auth-title");
+  const authSubmit = document.getElementById("auth-submit");
+  const authToggle = document.getElementById("auth-toggle");
+  const authMessage = document.getElementById("auth-message");
+  const userAccount = document.getElementById("user-account");
+  const accountEmail = document.getElementById("account-email");
+  const authEmail = document.getElementById("auth-email");
+  const authPassword = document.getElementById("auth-password");
+  const signOutButton = document.getElementById("sign-out-btn");
 
   const projectData = {
     "North Tower": {
@@ -27,54 +55,154 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  const requests = [
-    {
-      project: "North Tower",
-      elevation: "Elevation B",
-      scope: "Exterior",
-      eta: "1d 4h remaining"
-    },
-    {
-      project: "Harbor Residences",
-      elevation: "Elevation 1",
-      scope: "Interior",
-      eta: "2d 8h remaining"
-    },
-    {
-      project: "Riverfront Campus",
-      elevation: "Premium",
-      scope: "Both",
-      eta: "0h remaining"
-    },
-    {
-      project: "Coastal Plaza",
-      elevation: "Elevation South",
-      scope: "Exterior",
-      eta: "3d 6h remaining"
-    }
-  ];
+  let authMode = "login";
+  let currentUser = null;
+  let firebaseApp = null;
+  let firebaseAuth = null;
+  let firebaseDb = null;
+  let requests = [];
+  let unsubscribeRequests = null;
 
-  const renderRequests = () => {
+  const firebaseConfig = window.firebaseConfig || {};
+  const isFirebaseReady = Boolean(firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY");
+
+  function setFormMessage(element, text, isError = false) {
+    if (!element) return;
+    element.textContent = text;
+    element.className = `message ${isError ? "error" : "success"}`;
+    element.classList.remove("hidden");
+  }
+
+  function hideFormMessage(element) {
+    if (!element) return;
+    element.classList.add("hidden");
+    element.textContent = "";
+  }
+
+  function showAuthMessage(text, isError = false) {
+    setFormMessage(authMessage, text, isError);
+  }
+
+  function hideAuthMessage() {
+    hideFormMessage(authMessage);
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    const isLogin = mode === "login";
+    authTitle.textContent = isLogin ? "Sign in to continue" : "Create your account";
+    authSubmit.textContent = isLogin ? "Sign in" : "Create account";
+    authToggle.textContent = isLogin ? "Create account" : "Back to sign in";
+    authPassword.setAttribute("minlength", isLogin ? "6" : "6");
+  }
+
+  function toggleAuthenticatedState(user) {
+    const isLoggedIn = Boolean(user);
+
+    authForm.classList.toggle("hidden", isLoggedIn);
+    userAccount.classList.toggle("hidden", !isLoggedIn);
+
+    if (isLoggedIn) {
+      accountEmail.textContent = user.email || "Authenticated user";
+      hideAuthMessage();
+      authForm.reset();
+      form?.removeAttribute("disabled");
+    } else {
+      form?.setAttribute("disabled", "disabled");
+      form?.classList.add("disabled");
+      formMessage?.classList.add("hidden");
+    }
+  }
+
+  function initializeFirebase() {
+    if (!isFirebaseReady) {
+      showAuthMessage(
+        "Add your Firebase web config in docs/firebase-config.js before using sign-in.",
+        true
+      );
+      return false;
+    }
+
+    try {
+      firebaseApp = initializeApp(firebaseConfig);
+      firebaseAuth = getAuth(firebaseApp);
+      firebaseDb = getFirestore(firebaseApp);
+      return true;
+    } catch (error) {
+      console.error("Firebase initialization failed:", error);
+      showAuthMessage("Firebase could not be initialized. Check your project settings.", true);
+      return false;
+    }
+  }
+
+  function formatRequestDate(timestamp) {
+    if (!timestamp) return "Just now";
+    const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  }
+
+  function renderRequests() {
     if (!historyList) return;
 
-    historyList.innerHTML = requests
-      .slice()
-      .reverse()
+    const sortedRequests = [...requests].sort((a, b) => {
+      const aDate = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+      const bDate = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+      return bDate - aDate;
+    });
+
+    if (!sortedRequests.length) {
+      historyList.innerHTML = '<li class="empty-state">No requests saved yet.</li>';
+      return;
+    }
+
+    historyList.innerHTML = sortedRequests
       .map((request) => `
         <li class="request-item">
           <div class="request-header">
             <div>
               <strong>${request.project}</strong>
-              <div class="request-meta">${request.elevation} • ${request.scope}</div>
+              <div class="request-meta">${request.elevation} • ${request.scope}${request.interiorOption ? ` • ${request.interiorOption}` : ""}</div>
             </div>
-            <span class="request-eta">ETA: ${request.eta}</span>
+            <span class="request-eta">${formatRequestDate(request.createdAt)}</span>
           </div>
         </li>
       `)
       .join("");
-  };
+  }
 
-  const populateProjects = () => {
+  function listenForUserRequests(user) {
+    if (unsubscribeRequests) {
+      unsubscribeRequests();
+      unsubscribeRequests = null;
+    }
+
+    if (!user || !firebaseDb) {
+      requests = [];
+      renderRequests();
+      return;
+    }
+
+    const q = query(collection(firebaseDb, "projectRequests"), where("uid", "==", user.uid));
+    unsubscribeRequests = onSnapshot(
+      q,
+      (snapshot) => {
+        requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        renderRequests();
+      },
+      (error) => {
+        console.error("Firestore request listener failed:", error);
+        requests = [];
+        renderRequests();
+        setFormMessage(formMessage, "Unable to load your saved requests right now.", true);
+      }
+    );
+  }
+
+  function populateProjects() {
     if (!projectSelect) return;
     Object.keys(projectData).forEach((projectName) => {
       const option = document.createElement("option");
@@ -82,9 +210,9 @@ document.addEventListener("DOMContentLoaded", () => {
       option.textContent = projectName;
       projectSelect.appendChild(option);
     });
-  };
+  }
 
-  const updateInteriorOptions = () => {
+  function updateInteriorOptions() {
     if (!scopeSelect || !interiorOptionsWrapper || !interiorOptions) return;
 
     const selectedScope = scopeSelect.value;
@@ -92,9 +220,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     interiorOptionsWrapper.classList.toggle("hidden", !showInterior);
     interiorOptions.required = showInterior;
-  };
+  }
 
-  const updateOptions = () => {
+  function updateOptions() {
     if (!projectSelect || !elevationSelect) return;
 
     const selectedProject = projectSelect.value;
@@ -110,9 +238,9 @@ document.addEventListener("DOMContentLoaded", () => {
       option.textContent = value;
       elevationSelect.appendChild(option);
     });
-  };
+  }
 
-  const setActiveTab = (tabName) => {
+  function setActiveTab(tabName) {
     tabButtons.forEach((button) => {
       const isActive = button.dataset.tab === tabName;
       button.classList.toggle("is-active", isActive);
@@ -123,9 +251,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const isActive = panel.dataset.panel === tabName;
       panel.classList.toggle("is-active", isActive);
     });
-  };
+  }
 
-  const initSlideshow = () => {
+  function initSlideshow() {
     if (!slideshow) return;
 
     const slides = Array.from(slideshow.querySelectorAll(".slide"));
@@ -176,7 +304,93 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderSlide(0);
     start();
-  };
+  }
+
+  async function handleAuthSubmit(event) {
+    event.preventDefault();
+
+    if (!firebaseAuth || !isFirebaseReady) {
+      showAuthMessage("Complete your Firebase configuration in docs/firebase-config.js to sign in.", true);
+      return;
+    }
+
+    const email = authEmail.value.trim();
+    const password = authPassword.value.trim();
+
+    if (!email || !password) {
+      showAuthMessage("Please enter both your email and password.", true);
+      return;
+    }
+
+    try {
+      hideAuthMessage();
+      if (authMode === "login") {
+        await signInWithEmailAndPassword(firebaseAuth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      }
+    } catch (error) {
+      const message = error?.message || "Authentication failed.";
+      showAuthMessage(message, true);
+    }
+  }
+
+  function handleSignOut() {
+    if (!firebaseAuth) return;
+    signOut(firebaseAuth).catch((error) => {
+      console.error("Sign out failed:", error);
+    });
+  }
+
+  function handleRequestSubmit(event) {
+    event.preventDefault();
+
+    if (!currentUser) {
+      setFormMessage(formMessage, "Please sign in before submitting a request.", true);
+      return;
+    }
+
+    if (!projectSelect || !elevationSelect || !scopeSelect) return;
+
+    if (!projectSelect.value || !elevationSelect.value || !scopeSelect.value) {
+      setFormMessage(formMessage, "Please select a project, elevation style, and interior/exterior option.", true);
+      return;
+    }
+
+    if ((scopeSelect.value === "Interior" || scopeSelect.value === "Both") && (!interiorOptions || !interiorOptions.value)) {
+      setFormMessage(formMessage, "Please choose an interior option.", true);
+      return;
+    }
+
+    const request = {
+      project: projectSelect.value,
+      elevation: elevationSelect.value,
+      scope: scopeSelect.value,
+      interiorOption: interiorOptions?.value || "",
+      uid: currentUser.uid,
+      email: currentUser.email,
+      createdAt: serverTimestamp()
+    };
+
+    if (!firebaseDb) {
+      setFormMessage(formMessage, "Firebase Firestore is not configured yet.", true);
+      return;
+    }
+
+    addDoc(collection(firebaseDb, "projectRequests"), request)
+      .then(() => {
+        setFormMessage(formMessage, `Request submitted for ${request.project} • ${request.elevation} • ${request.scope}.`);
+        form.reset();
+        projectSelect.selectedIndex = 0;
+        scopeSelect.selectedIndex = 0;
+        updateOptions();
+        updateInteriorOptions();
+      })
+      .catch((error) => {
+        console.error("Save request failed:", error);
+        setFormMessage(formMessage, "Request could not be saved. Please try again.", true);
+      });
+  }
 
   tabButtons.forEach((button) => {
     button.addEventListener("click", () => setActiveTab(button.dataset.tab));
@@ -191,48 +405,37 @@ document.addEventListener("DOMContentLoaded", () => {
     scopeSelect.addEventListener("change", updateInteriorOptions);
   }
 
+  if (form) {
+    form.addEventListener("submit", handleRequestSubmit);
+  }
+
+  if (authForm) {
+    authForm.addEventListener("submit", handleAuthSubmit);
+  }
+
+  if (authToggle) {
+    authToggle.addEventListener("click", () => {
+      hideAuthMessage();
+      setAuthMode(authMode === "login" ? "signup" : "login");
+    });
+  }
+
+  if (signOutButton) {
+    signOutButton.addEventListener("click", handleSignOut);
+  }
+
   renderRequests();
   setActiveTab("home");
   updateOptions();
   updateInteriorOptions();
   initSlideshow();
+  setAuthMode("login");
 
-  form?.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    if (!projectSelect || !elevationSelect || !scopeSelect) return;
-
-    if (!projectSelect.value || !elevationSelect.value || !scopeSelect.value) {
-      formMessage.textContent = "Please select a project, elevation style, and interior/exterior option.";
-      formMessage.classList.remove("hidden");
-      return;
-    }
-
-    if (scopeSelect.value === "Interior" || scopeSelect.value === "Both") {
-      if (!interiorOptions || !interiorOptions.value) {
-        formMessage.textContent = "Please choose an interior option.";
-        formMessage.classList.remove("hidden");
-        return;
-      }
-    }
-
-    const request = {
-      project: projectSelect.value,
-      elevation: elevationSelect.value,
-      scope: scopeSelect.value,
-      eta: "3d 6h remaining"
-    };
-
-    requests.push(request);
-    renderRequests();
-
-    formMessage.textContent = `Request submitted for ${request.project} • ${request.elevation} • ${request.scope}.`;
-    formMessage.classList.remove("hidden");
-
-    form.reset();
-    projectSelect.selectedIndex = 0;
-    scopeSelect.selectedIndex = 0;
-    updateOptions();
-    updateInteriorOptions();
-  });
+  if (initializeFirebase()) {
+    onAuthStateChanged(firebaseAuth, (user) => {
+      currentUser = user;
+      toggleAuthenticatedState(user);
+      listenForUserRequests(user);
+    });
+  }
 });
