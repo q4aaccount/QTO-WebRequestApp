@@ -54,7 +54,37 @@
           <section class="tab-panel is-active" data-panel="home">
             <div class="home-layout">
               <section class="workspace">
-                <section class="panel request-panel">
+                <section id="auth-panel" class="panel auth-panel">
+                  <div class="auth-header">
+                    <p class="eyebrow eyebrow-dark">Welcome</p>
+                    <h3 id="auth-title">Sign in to continue</h3>
+                  </div>
+
+                  <form id="auth-form" class="auth-form">
+                    <label>
+                      Email
+                      <input id="auth-email" type="email" placeholder="you@example.com" autocomplete="email" required />
+                    </label>
+
+                    <label>
+                      Password
+                      <input id="auth-password" type="password" placeholder="Enter your password" autocomplete="current-password" minlength="6" required />
+                    </label>
+
+                    <button type="submit" id="auth-submit" class="primary-button">Sign in</button>
+                    <button type="button" id="auth-toggle" class="text-button">Create account</button>
+                  </form>
+
+                  <div id="user-account" class="user-account hidden">
+                    <p class="user-account-label">Signed in as</p>
+                    <strong id="account-email">Authenticated user</strong>
+                    <button type="button" id="sign-out-btn" class="secondary-button">Sign out</button>
+                  </div>
+
+                  <div id="auth-message" class="message hidden" aria-live="polite"></div>
+                </section>
+
+                <section id="request-panel" class="panel request-panel hidden">
                   <form id="request-form" class="request-form">
                     <label>
                       Project

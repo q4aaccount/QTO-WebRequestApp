@@ -259,9 +259,73 @@ select {
   max-width: none;
 }
 
+.auth-panel,
 .request-panel {
   min-height: 100%;
   overflow: hidden;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--text);
+}
+
+.auth-form,
+.user-account {
+  display: grid;
+  gap: 16px;
+}
+
+.auth-form label,
+.user-account {
+  color: var(--text);
+}
+
+input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f9f7f4;
+  color: var(--text);
+  padding: 0.9rem 1rem;
+}
+
+input:focus {
+  outline: none;
+  border-color: rgba(17, 17, 17, 0.5);
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.08);
+}
+
+.text-button,
+.secondary-button {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--text);
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-account {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-alt);
+  padding: 16px;
+}
+
+.user-account-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .gallery-panel {
