@@ -22,6 +22,11 @@
             <span class="brand-4a">4A</span>
           </div>
         </div>
+        <div class="brand-credit">Powered by Q4Automation</div>
+        <nav class="tab-nav" aria-label="Main sections">
+          <button type="button" class="tab-button is-active" data-tab="home" aria-selected="true">Home</button>
+          <button type="button" class="tab-button" data-tab="history" aria-selected="false">Request History</button>
+        </nav>
       </aside>
 
       <main class="content">
@@ -32,101 +37,107 @@
           </div>
         </header>
 
-        <section class="workspace">
-          <section class="panel request-panel">
-            <form id="request-form" class="request-form">
-              <label>
-                Project
-                <select id="project-select" required>
-                  <option value="">Select a project</option>
-                </select>
-              </label>
+        <div class="tab-panels">
+          <section class="tab-panel is-active" data-panel="home">
+            <section class="workspace">
+              <section class="panel request-panel">
+                <form id="request-form" class="request-form">
+                  <label>
+                    Project
+                    <select id="project-select" required>
+                      <option value="">Select a project</option>
+                    </select>
+                  </label>
 
-              <label>
-                Elevation style
-                <select id="elevation-select" required>
-                  <option value="">Select an elevation style</option>
-                </select>
-              </label>
+                  <label>
+                    Elevation style
+                    <select id="elevation-select" required>
+                      <option value="">Select an elevation style</option>
+                    </select>
+                  </label>
 
-              <label>
-                Exterior / Interior
-                <select id="scope-select" required>
-                  <option value="">Select an option</option>
-                  <option value="Interior">Interior</option>
-                  <option value="Exterior">Exterior</option>
-                  <option value="Both">Both</option>
-                </select>
-              </label>
+                  <label>
+                    Exterior / Interior
+                    <select id="scope-select" required>
+                      <option value="">Select an option</option>
+                      <option value="Interior">Interior</option>
+                      <option value="Exterior">Exterior</option>
+                      <option value="Both">Both</option>
+                    </select>
+                  </label>
 
-              <div id="interior-options-wrapper" class="hidden">
-                <label>
-                  Interior options
-                  <select id="interior-options">
-                    <option value="">Select an interior option</option>
-                    <option value="Cabinets">Cabinets</option>
-                    <option value="Countertops">Countertops</option>
-                    <option value="Flooring">Flooring</option>
-                    <option value="Paint">Paint</option>
-                    <option value="Trim">Trim</option>
-                    <option value="Lighting">Lighting</option>
-                  </select>
-                </label>
-              </div>
+                  <div id="interior-options-wrapper" class="hidden">
+                    <label>
+                      Interior options
+                      <select id="interior-options">
+                        <option value="">Select an interior option</option>
+                        <option value="Cabinets">Cabinets</option>
+                        <option value="Countertops">Countertops</option>
+                        <option value="Flooring">Flooring</option>
+                        <option value="Paint">Paint</option>
+                        <option value="Trim">Trim</option>
+                        <option value="Lighting">Lighting</option>
+                      </select>
+                    </label>
+                  </div>
 
-              <button type="submit" class="primary-button">Submit request</button>
-            </form>
+                  <button type="submit" class="primary-button">Submit request</button>
+                </form>
 
-            <div id="form-message" class="message hidden" aria-live="polite"></div>
+                <div id="form-message" class="message hidden" aria-live="polite"></div>
+              </section>
+
+              <aside class="gallery-panel" aria-label="Project reference images">
+                <div class="gallery-header">
+                  <p class="eyebrow eyebrow-dark">Reference</p>
+                  <h3>Elevation concepts</h3>
+                </div>
+
+                <div class="slideshow" data-slideshow>
+                  <figure class="slide is-active">
+                    <img
+                      src="https://github.com/user-attachments/assets/256fce42-37a9-42c0-af97-36bbe810c4dd"
+                      alt="Reference image 1"
+                    />
+                  </figure>
+                  <figure class="slide">
+                    <img
+                      src="https://github.com/user-attachments/assets/4f74e958-7b6a-4c76-8b6a-b0277dc1d6de"
+                      alt="Reference image 2"
+                    />
+                  </figure>
+                  <figure class="slide">
+                    <img
+                      src="https://github.com/user-attachments/assets/ec5278fe-5aab-4730-a0c4-592795918b4c"
+                      alt="Reference image 3"
+                    />
+                  </figure>
+                  <figure class="slide">
+                    <img
+                      src="https://github.com/user-attachments/assets/db865273-19b3-4d22-b370-a2e62c64d024"
+                      alt="Reference image 4"
+                    />
+                  </figure>
+                  <div class="slide-indicators" aria-label="Slideshow navigation">
+                    <button type="button" class="slide-dot is-active" data-slide-to="0" aria-label="Show image 1"></button>
+                    <button type="button" class="slide-dot" data-slide-to="1" aria-label="Show image 2"></button>
+                    <button type="button" class="slide-dot" data-slide-to="2" aria-label="Show image 3"></button>
+                    <button type="button" class="slide-dot" data-slide-to="3" aria-label="Show image 4"></button>
+                  </div>
+                </div>
+              </aside>
+            </section>
           </section>
 
-          <aside class="gallery-panel" aria-label="Project reference images">
-            <div class="gallery-header">
-              <p class="eyebrow eyebrow-dark">Reference</p>
-              <h3>Elevation concepts</h3>
-            </div>
-
-            <div class="slideshow" data-slideshow>
-              <figure class="slide is-active">
-                <img
-                  src="https://github.com/user-attachments/assets/256fce42-37a9-42c0-af97-36bbe810c4dd"
-                  alt="Reference image 1"
-                />
-              </figure>
-              <figure class="slide">
-                <img
-                  src="https://github.com/user-attachments/assets/4f74e958-7b6a-4c76-8b6a-b0277dc1d6de"
-                  alt="Reference image 2"
-                />
-              </figure>
-              <figure class="slide">
-                <img
-                  src="https://github.com/user-attachments/assets/ec5278fe-5aab-4730-a0c4-592795918b4c"
-                  alt="Reference image 3"
-                />
-              </figure>
-              <figure class="slide">
-                <img
-                  src="https://github.com/user-attachments/assets/db865273-19b3-4d22-b370-a2e62c64d024"
-                  alt="Reference image 4"
-                />
-              </figure>
-              <div class="slide-indicators" aria-label="Slideshow navigation">
-                <button type="button" class="slide-dot is-active" data-slide-to="0" aria-label="Show image 1"></button>
-                <button type="button" class="slide-dot" data-slide-to="1" aria-label="Show image 2"></button>
-                <button type="button" class="slide-dot" data-slide-to="2" aria-label="Show image 3"></button>
-                <button type="button" class="slide-dot" data-slide-to="3" aria-label="Show image 4"></button>
+          <section class="tab-panel" data-panel="history">
+            <section class="panel request-list-panel">
+              <div class="panel-header">
+                <h3>Recent requests</h3>
               </div>
-            </div>
-          </aside>
-        </section>
-
-        <section class="panel request-list-panel">
-          <div class="panel-header">
-            <h3>Recent requests</h3>
-          </div>
-          <ul id="request-list" class="request-list" aria-live="polite"></ul>
-        </section>
+              <ul id="request-list" class="request-list" aria-live="polite"></ul>
+            </section>
+          </section>
+        </div>
       </main>
     </div>
 
