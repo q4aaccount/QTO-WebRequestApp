@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("request-form");
   const formMessage = document.getElementById("form-message");
   const list = document.getElementById("request-list");
+  const slideshow = document.querySelector("[data-slideshow]");
 
   const projectData = {
     "North Tower": {
@@ -108,6 +109,56 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const initSlideshow = () => {
+    if (!slideshow) return;
+
+    const slides = Array.from(slideshow.querySelectorAll(".slide"));
+    const dots = Array.from(slideshow.querySelectorAll(".slide-dot"));
+    if (!slides.length) return;
+
+    let activeIndex = 0;
+    let timerId = null;
+    const intervalMs = 4500;
+
+    const renderSlide = (index) => {
+      activeIndex = index;
+      slides.forEach((slide, slideIndex) => {
+        slide.classList.toggle("is-active", slideIndex === activeIndex);
+      });
+      dots.forEach((dot, dotIndex) => {
+        dot.classList.toggle("is-active", dotIndex === activeIndex);
+      });
+    };
+
+    const start = () => {
+      if (slides.length < 2 || timerId) return;
+      timerId = window.setInterval(() => {
+        const next = (activeIndex + 1) % slides.length;
+        renderSlide(next);
+      }, intervalMs);
+    };
+
+    const stop = () => {
+      if (!timerId) return;
+      clearInterval(timerId);
+      timerId = null;
+    };
+
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        const target = Number(dot.getAttribute("data-slide-to"));
+        if (Number.isNaN(target)) return;
+        renderSlide(target);
+      });
+    });
+
+    slideshow.addEventListener("mouseenter", stop);
+    slideshow.addEventListener("mouseleave", start);
+
+    renderSlide(0);
+    start();
+  };
+
   if (projectSelect) {
     populateProjects();
     projectSelect.addEventListener("change", updateOptions);
@@ -120,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderRequests();
   updateOptions();
   updateInteriorOptions();
+  initSlideshow();
 
   form?.addEventListener("submit", (event) => {
     event.preventDefault();
