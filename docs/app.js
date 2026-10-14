@@ -1,4 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getAnalytics,
+  isSupported as isAnalyticsSupported
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
 import { 
   createUserWithEmailAndPassword,
   getAuth,
@@ -60,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let firebaseApp = null;
   let firebaseAuth = null;
   let firebaseDb = null;
+  let firebaseAnalytics = null;
   let requests = [];
   let unsubscribeRequests = null;
 
@@ -127,6 +132,15 @@ document.addEventListener("DOMContentLoaded", () => {
       firebaseApp = initializeApp(firebaseConfig);
       firebaseAuth = getAuth(firebaseApp);
       firebaseDb = getFirestore(firebaseApp);
+      isAnalyticsSupported()
+        .then((supported) => {
+          if (supported) {
+            firebaseAnalytics = getAnalytics(firebaseApp);
+          }
+        })
+        .catch((error) => {
+          console.warn("Firebase analytics is unavailable:", error);
+        });
       return true;
     } catch (error) {
       console.error("Firebase initialization failed:", error);
