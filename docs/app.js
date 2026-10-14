@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const formMessage = document.getElementById("form-message");
   const historyList = document.getElementById("history-request-list");
   const slideshow = document.querySelector("[data-slideshow]");
+  const galleryTitle = document.getElementById("gallery-title");
   const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
   const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
 
@@ -143,6 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
       dots.forEach((dot, dotIndex) => {
         dot.classList.toggle("is-active", dotIndex === activeIndex);
       });
+      if (galleryTitle) {
+        galleryTitle.textContent = slides[activeIndex]?.dataset.title || "Elevation concepts";
+      }
     };
 
     const start = () => {
