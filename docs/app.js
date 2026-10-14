@@ -13,6 +13,7 @@ import {
 import {
   addDoc,
   collection,
+  getDocs,
   getFirestore,
   onSnapshot,
   query,
@@ -26,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const scopeSelect = document.getElementById("scope-select");
   const interiorOptionsWrapper = document.getElementById("interior-options-wrapper");
   const interiorOptions = document.getElementById("interior-options");
+  const requestPanel = document.getElementById("request-panel");
   const form = document.getElementById("request-form");
   const formMessage = document.getElementById("form-message");
   const historyList = document.getElementById("history-request-list");
@@ -44,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const authPassword = document.getElementById("auth-password");
   const signOutButton = document.getElementById("sign-out-btn");
 
-  const projectData = {
+  const defaultProjectData = {
     "North Tower": {
       elevations: ["Elevation A", "Elevation B", "Elevation C"]
     },
@@ -58,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
       elevations: ["Elevation South", "Elevation North"]
     }
   };
+  let projectData = { ...defaultProjectData };
 
   let authMode = "login";
   let currentUser = null;
@@ -104,14 +107,17 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleAuthenticatedState(user) {
     const isLoggedIn = Boolean(user);
 
-    authForm.classList.toggle("hidden", isLoggedIn);
-    userAccount.classList.toggle("hidden", !isLoggedIn);
+    authForm?.classList.toggle("hidden", isLoggedIn);
+    userAccount?.classList.toggle("hidden", !isLoggedIn);
+    requestPanel?.classList.toggle("hidden", !isLoggedIn);
 
     if (isLoggedIn) {
       accountEmail.textContent = user.email || "Authenticated user";
       hideAuthMessage();
-      authForm.reset();
+      authForm?.reset();
       form?.removeAttribute("disabled");
+      form?.classList.remove("disabled");
+      formMessage?.classList.remove("hidden");
     } else {
       form?.setAttribute("disabled", "disabled");
       form?.classList.add("disabled");
@@ -216,14 +222,42 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  async function loadProjectData() {
+    if (!firebaseDb || !projectSelect) return;
+
+    try {
+      const snapshot = await getDocs(collection(firebaseDb, "projects"));
+      const firestoreProjects = {};
+
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const projectName = data.name || data.projectName || doc.id;
+        firestoreProjects[projectName] = {
+          elevations: Array.isArray(data.elevations) ? data.elevations : defaultProjectData[projectName]?.elevations || []
+        };
+      });
+
+      if (Object.keys(firestoreProjects).length) {
+        projectData = firestoreProjects;
+      }
+    } catch (error) {
+      console.warn("Project data not available from Firestore, using defaults.", error);
+      projectData = { ...defaultProjectData };
+    }
+
+    populateProjects();
+  }
+
   function populateProjects() {
     if (!projectSelect) return;
+    projectSelect.innerHTML = '<option value="">Select a project</option>';
     Object.keys(projectData).forEach((projectName) => {
       const option = document.createElement("option");
       option.value = projectName;
       option.textContent = projectName;
       projectSelect.appendChild(option);
     });
+    updateOptions();
   }
 
   function updateInteriorOptions() {
@@ -446,6 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setAuthMode("login");
 
   if (initializeFirebase()) {
+    loadProjectData();
     onAuthStateChanged(firebaseAuth, (user) => {
       currentUser = user;
       toggleAuthenticatedState(user);
