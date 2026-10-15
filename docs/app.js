@@ -104,26 +104,32 @@ document.addEventListener("DOMContentLoaded", () => {
     authPassword.setAttribute("minlength", isLogin ? "6" : "6");
   }
 
-  function toggleAuthenticatedState(user) {
-    const isLoggedIn = Boolean(user);
+function toggleAuthenticatedState(user) {
+  const isLoggedIn = Boolean(user);
 
-    authForm?.classList.toggle("hidden", isLoggedIn);
-    userAccount?.classList.toggle("hidden", !isLoggedIn);
-    requestPanel?.classList.toggle("hidden", !isLoggedIn);
+  // Hide the entire login panel after sign-in
+  authPanel?.classList.toggle("hidden", isLoggedIn);
 
-    if (isLoggedIn) {
-      accountEmail.textContent = user.email || "Authenticated user";
-      hideAuthMessage();
-      authForm?.reset();
-      form?.removeAttribute("disabled");
-      form?.classList.remove("disabled");
-      formMessage?.classList.remove("hidden");
-    } else {
-      form?.setAttribute("disabled", "disabled");
-      form?.classList.add("disabled");
-      formMessage?.classList.add("hidden");
-    }
+  // Show the request panel after sign-in
+  requestPanel?.classList.toggle("hidden", !isLoggedIn);
+
+  if (isLoggedIn) {
+    accountEmail.textContent = user.email || "Authenticated user";
+    hideAuthMessage();
+
+    authForm?.reset();
+
+    form?.removeAttribute("disabled");
+    form?.classList.remove("disabled");
+
+    // Keep hidden until there is an actual message
+    formMessage?.classList.add("hidden");
+  } else {
+    form?.setAttribute("disabled", "disabled");
+    form?.classList.add("disabled");
+    formMessage?.classList.add("hidden");
   }
+}
 
   function initializeFirebase() {
     if (!isFirebaseReady) {
