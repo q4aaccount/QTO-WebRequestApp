@@ -13,11 +13,13 @@ import {
 import {
   addDoc,
   collection,
+  doc,
   getDocs,
   getFirestore,
   onSnapshot,
   query,
   serverTimestamp,
+  setDoc,
   where
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
@@ -181,7 +183,8 @@ function toggleAuthenticatedState(user) {
     hideFormMessage(formMessage);
   }
 }
-  function initializeFirebase() {
+ 
+ function initializeFirebase() {
     if (!isFirebaseReady) {
       showAuthMessage(
         "Add your Firebase web config in docs/firebase-config.js before using sign-in.",
@@ -210,6 +213,37 @@ function toggleAuthenticatedState(user) {
       return false;
     }
   } 
+
+async function createUserProfile(user) {
+  if (!user || !firebaseDb) {
+    throw new Error(
+      "The authenticated user or Firestore is unavailable."
+    );
+  }
+
+  const email = user.email || "";
+
+  const displayName =
+    user.displayName ||
+    email.split("@")[0] ||
+    "User";
+
+  const userReference = doc(
+    firebaseDb,
+    "users",
+    user.uid
+  );
+
+  await setDoc(userReference, {
+    uid: user.uid,
+    email,
+    displayName,
+    role: "user",
+    active: true,
+    createdAt: serverTimestamp()
+  });
+}
+
  function formatRequestDate(timestamp) {
     if (!timestamp) return "Just now";
     const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -427,16 +461,49 @@ function toggleAuthenticatedState(user) {
 
     try {
       hideAuthMessage();
-      if (authMode === "login") {
-        await signInWithEmailAndPassword(firebaseAuth, email, password);
-      } else {
-        await createUserWithEmailAndPassword(firebaseAuth, email, password);
-      }
+if (authMode === "login") {
+  await signInWithEmailAndPassword(
+    firebaseAuth,
+    email,
+    password
+  );
+} else {
+  const userCredential =
+    await createUserWithEmailAndPassword(
+      firebaseAuth,
+      email,
+      password
+    );
+
+  await createUserProfile(
+    userCredential.user
+  );
+}
+``
     } catch (error) {
       const message = error?.message || "Authentication failed.";
       showAuthMessage(message, true);
     }
   }
+
+async function ensureUserProfile(user) {
+  if (!user || !firebaseDb) {
+    return;
+  }
+
+  const userReference = doc(
+    firebaseDb,
+    "users",
+    user.uid
+  );
+
+  const userSnapshot =
+    await getDoc(userReference);
+
+  if (!userSnapshot.exists()) {
+    await createUserProfile(user);
+  }
+}
 
 async function handleSignOut() {
   if (!firebaseAuth) {
@@ -578,6 +645,7 @@ if (initializeFirebase()) {
       toggleAuthenticatedState(user);
 
       if (user) {
+		  await ensureUserProfile(user);
         await loadProjectData();
         listenForUserRequests(user);
       } else {
