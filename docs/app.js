@@ -111,8 +111,7 @@ function toggleAuthenticatedState(user) {
   console.log("Authentication state:", {
     isLoggedIn,
     email: user?.email,
-    authPanel,
-    requestPanel
+    displayName: user?.displayName
   });
 
   if (!authPanel || !requestPanel) {
@@ -120,26 +119,59 @@ function toggleAuthenticatedState(user) {
       authPanel,
       requestPanel
     });
+
     return;
   }
 
-  // Logged out: show login and hide request form.
-  // Logged in: hide login and show request form.
+  // Show login panel only when signed out.
   authPanel.classList.toggle("hidden", isLoggedIn);
+
+  // Show request panel only when signed in.
   requestPanel.classList.toggle("hidden", !isLoggedIn);
 
+  // Show sidebar account only when signed in.
+  userAccount?.classList.toggle("hidden", !isLoggedIn);
+
   if (isLoggedIn) {
+    const email = user.email || "";
+
+    // Firebase displayName may be empty for email/password accounts.
+    // Use the part before @ as a fallback.
+    const fallbackName =
+      email.split("@")[0] || "Authenticated user";
+
+    const displayName =
+      user.displayName || fallbackName;
+
+    if (accountName) {
+      accountName.textContent = displayName;
+    }
+
     if (accountEmail) {
-      accountEmail.textContent =
-        user.email || "Authenticated user";
+      accountEmail.textContent = email;
+      accountEmail.title = email;
+    }
+
+    if (accountAvatar) {
+      accountAvatar.textContent =
+        displayName.charAt(0).toUpperCase();
     }
 
     authForm?.reset();
     hideAuthMessage();
     hideFormMessage(formMessage);
   } else {
+    if (accountName) {
+      accountName.textContent = "User";
+    }
+
     if (accountEmail) {
       accountEmail.textContent = "";
+      accountEmail.removeAttribute("title");
+    }
+
+    if (accountAvatar) {
+      accountAvatar.textContent = "U";
     }
 
     requests = [];
@@ -147,36 +179,6 @@ function toggleAuthenticatedState(user) {
     hideFormMessage(formMessage);
   }
 }
-  function initializeFirebase() {
-    if (!isFirebaseReady) {
-      showAuthMessage(
-        "Add your Firebase web config in docs/firebase-config.js before using sign-in.",
-        true
-      );
-      return false;
-    }
-
-    try {
-      firebaseApp = initializeApp(firebaseConfig);
-      firebaseAuth = getAuth(firebaseApp);
-      firebaseDb = getFirestore(firebaseApp);
-      isAnalyticsSupported()
-        .then((supported) => {
-          if (supported) {
-            firebaseAnalytics = getAnalytics(firebaseApp);
-          }
-        })
-        .catch((error) => {
-          console.warn("Firebase analytics is unavailable:", error);
-        });
-      return true;
-    } catch (error) {
-      console.error("Firebase initialization failed:", error);
-      showAuthMessage("Firebase could not be initialized. Check your project settings.", true);
-      return false;
-    }
-  }
-
   function formatRequestDate(timestamp) {
     if (!timestamp) return "Just now";
     const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -405,12 +407,40 @@ function toggleAuthenticatedState(user) {
     }
   }
 
-  function handleSignOut() {
-    if (!firebaseAuth) return;
-    signOut(firebaseAuth).catch((error) => {
-      console.error("Sign out failed:", error);
-    });
+async function handleSignOut() {
+  if (!firebaseAuth) {
+    console.error("Firebase Authentication is unavailable.");
+    return;
   }
+
+  if (signOutButton) {
+    signOutButton.disabled = true;
+    signOutButton.textContent = "Logging out...";
+  }
+
+  try {
+    await signOut(firebaseAuth);
+
+    // onAuthStateChanged will automatically:
+    // 1. Show the login panel.
+    // 2. Hide the request panel.
+    // 3. Hide the sidebar account.
+    // 4. Clear user request history.
+  } catch (error) {
+    console.error("Sign out failed:", error);
+
+    setFormMessage(
+      formMessage,
+      "Unable to log out. Please try again.",
+      true
+    );
+  } finally {
+    if (signOutButton) {
+      signOutButton.disabled = false;
+      signOutButton.textContent = "Log out";
+    }
+  }
+}
 
   function handleRequestSubmit(event) {
     event.preventDefault();
