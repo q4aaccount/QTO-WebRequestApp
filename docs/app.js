@@ -15,6 +15,7 @@ import {
   collection,
   doc,
   getDocs,
+  getDoc,
   getFirestore,
   onSnapshot,
   query,
