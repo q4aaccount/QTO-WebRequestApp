@@ -501,7 +501,41 @@ function toggleAuthenticatedState(user) {
   initSlideshow();
   setAuthMode("login");
 
-  if (initializeFirebase()) {
+if (initializeFirebase()) {
+  onAuthStateChanged(
+    firebaseAuth,
+    async (user) => {
+      currentUser = user;
+
+      console.log("Authentication state:", {
+        signedIn: Boolean(user),
+        email: user?.email,
+        uid: user?.uid
+      });
+
+      toggleAuthenticatedState(user);
+
+      if (user) {
+        await loadProjectData();
+        listenForUserRequests(user);
+      } else {
+        requests = [];
+        renderRequests();
+      }
+    },
+    (error) => {
+      console.error("Authentication state error:", error);
+
+      currentUser = null;
+      toggleAuthenticatedState(null);
+
+      showAuthMessage(
+        "Unable to determine your authentication status.",
+        true
+      );
+    }
+  );
+}
   loadProjectData();
 
   onAuthStateChanged(
