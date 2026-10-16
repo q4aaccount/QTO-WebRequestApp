@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const accountAvatar = document.getElementById("account-avatar");
   const authEmail = document.getElementById("auth-email");
   const authPassword = document.getElementById("auth-password");
+   const requestHistoryButton = document.getElementById("request-his-btn");
   const signOutButton = document.getElementById("sign-out-btn");
 
   const defaultProjectData = {
@@ -66,6 +67,36 @@ document.addEventListener("DOMContentLoaded", () => {
       elevations: ["Elevation South", "Elevation North"]
     }
   };
+  
+  
+
+
+const sampleRequests = [
+  {
+    project: "North Tower",
+    elevation: "Elevation A",
+    scope: "Exterior",
+    interiorOption: "",
+    createdAt: new Date("2026-10-10"),
+    isSample: true
+  },
+  {
+    project: "Harbor Residences",
+    elevation: "Elevation 2",
+    scope: "Interior",
+    interiorOption: "Cabinets",
+    createdAt: new Date("2026-10-06"),
+    isSample: true
+  },
+  {
+    project: "Coastal Plaza",
+    elevation: "Elevation South",
+    scope: "Both",
+    interiorOption: "Flooring",
+    createdAt: new Date("2026-10-01"),
+    isSample: true
+  }
+];
   let projectData = { ...defaultProjectData };
 
   let authMode = "login";
@@ -136,6 +167,8 @@ function toggleAuthenticatedState(user) {
 
   // Show sidebar account only when signed in.
   userAccount?.classList.toggle("hidden", !isLoggedIn);
+  
+  // Show sample request History when user is not logged in
 
   if (isLoggedIn) {
     const email = user.email || "";
@@ -255,34 +288,106 @@ async function createUserProfile(user) {
     });
   }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
   function renderRequests() {
-    if (!historyList) return;
+  if (!historyList) return;
 
-    const sortedRequests = [...requests].sort((a, b) => {
-      const aDate = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
-      const bDate = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+  const isShowingSamples = !currentUser;
+
+  const requestsToDisplay = isShowingSamples
+    ? sampleRequests
+    : requests;
+
+  const sortedRequests = [...requestsToDisplay].sort(
+    (a, b) => {
+      const aDate = a.createdAt?.toDate
+        ? a.createdAt.toDate().getTime()
+        : new Date(a.createdAt || 0).getTime();
+
+      const bDate = b.createdAt?.toDate
+        ? b.createdAt.toDate().getTime()
+        : new Date(b.createdAt || 0).getTime();
+
       return bDate - aDate;
-    });
-
-    if (!sortedRequests.length) {
-      historyList.innerHTML = '<li class="empty-state">No requests saved yet.</li>';
-      return;
     }
+  );
 
-    historyList.innerHTML = sortedRequests
-      .map((request) => `
-        <li class="request-item">
+  if (!sortedRequests.length) {
+    historyList.innerHTML = `
+      <li class="empty-state">
+        <strong>No requests submitted yet</strong>
+        <span>
+          Your submitted requests will appear here.
+        </span>
+      </li>
+    `;
+
+    return;
+  }
+
+  const sampleNotice = isShowingSamples
+    ? `
+      <li class="sample-history-notice">
+        <strong>Sample request history</strong>
+        <span>
+          Sign in to view your actual requests.
+        </span>
+      </li>
+    `
+    : "";
+
+  const requestItems = sortedRequests
+    .map((request) => {
+      const sampleBadge = request.isSample
+        ? `<span class="sample-badge">Sample</span>`
+        : "";
+
+      const interiorDetails =
+        request.interiorOption
+          ? ` • ${escapeHtml(request.interiorOption)}`
+          : "";
+
+      return `
+        <li class="request-item ${
+          request.isSample ? "sample-request" : ""
+        }">
           <div class="request-header">
             <div>
-              <strong>${request.project}</strong>
-              <div class="request-meta">${request.elevation} • ${request.scope}${request.interiorOption ? ` • ${request.interiorOption}` : ""}</div>
+              <div class="request-title">
+                <strong>
+                  ${escapeHtml(request.project)}
+                </strong>
+
+                ${sampleBadge}
+              </div>
+
+              <div class="request-meta">
+                ${escapeHtml(request.elevation)}
+                • ${escapeHtml(request.scope)}
+                ${interiorDetails}
+              </div>
             </div>
-            <span class="request-eta">${formatRequestDate(request.createdAt)}</span>
+
+            <span class="request-eta">
+              ${formatRequestDate(request.createdAt)}
+            </span>
           </div>
         </li>
-      `)
-      .join("");
-  }
+      `;
+    })
+    .join("");
+
+  historyList.innerHTML =
+    sampleNotice + requestItems;
+}
 
   function listenForUserRequests(user) {
     if (unsubscribeRequests) {
