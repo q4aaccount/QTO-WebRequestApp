@@ -565,5 +565,5 @@ if (initializeFirebase()) {
       );
     }
   );
-}
+
 });
