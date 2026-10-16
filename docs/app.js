@@ -696,6 +696,34 @@ async function handleSignOut() {
       });
   }
 
+async function getUserProfile(user) {
+  if (!user || !firebaseDb) {
+    return null;
+  }
+
+  const userReference = doc(
+    firebaseDb,
+    "users",
+    user.uid
+  );
+
+  const userSnapshot = await getDoc(userReference);
+
+  if (!userSnapshot.exists()) {
+    console.warn(
+      "No Firestore user profile exists for:",
+      user.uid
+    );
+
+    return null;
+  }
+
+  return {
+    uid: user.uid,
+    ...userSnapshot.data()
+  };
+}
+
   tabButtons.forEach((button) => {
     button.addEventListener("click", () => setActiveTab(button.dataset.tab));
   });
@@ -742,20 +770,9 @@ if (initializeFirebase()) {
     async (user) => {
       currentUser = user;
 
-      console.log("Authentication state:", {
-        signedIn: Boolean(user),
-        email: user?.email,
-        uid: user?.uid
-      });
+      if (!user) {
+        toggleAuthenticatedState(null);
 
-      toggleAuthenticatedState(user);
-
-      if (user) {
-		  await ensureUserProfile(user);
-        await loadProjectData();
-        listenForUserRequests(user);
-      } else {
-        // Stop the existing Firestore listener after sign-out.
         if (unsubscribeRequests) {
           unsubscribeRequests();
           unsubscribeRequests = null;
@@ -763,11 +780,57 @@ if (initializeFirebase()) {
 
         requests = [];
         renderRequests();
+        return;
+      }
+
+      try {
+        const userProfile =
+          await getUserProfile(user);
+
+        console.log(
+          "Authenticated user profile:",
+          userProfile
+        );
+
+        const isAdmin =
+          userProfile?.role === "admin";
+
+        if (isAdmin) {
+          console.log(
+            "Administrator detected. Opening admin page."
+          );
+
+          window.location.replace("./admin.html");
+          return;
+        }
+
+        // Continue to the regular user portal.
+        toggleAuthenticatedState(user);
+
+        await loadProjectData(user);
+        listenForUserRequests(user);
+      } catch (error) {
+        console.error(
+          "Unable to determine the user role:",
+          error
+        );
+
+        // Do not grant admin access if the role check fails.
+        toggleAuthenticatedState(user);
+
+        setFormMessage(
+          formMessage,
+          "Your account profile could not be completely loaded.",
+          true
+        );
       }
     },
 
     (error) => {
-      console.error("Authentication state error:", error);
+      console.error(
+        "Authentication state error:",
+        error
+      );
 
       currentUser = null;
       toggleAuthenticatedState(null);
@@ -778,5 +841,5 @@ if (initializeFirebase()) {
       );
     }
   );
-};
+}
 });
