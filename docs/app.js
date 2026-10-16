@@ -22,6 +22,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+	const authPanel = document.getElementById("auth-panel");
   const projectSelect = document.getElementById("project-select");
   const elevationSelect = document.getElementById("elevation-select");
   const scopeSelect = document.getElementById("scope-select");
@@ -107,30 +108,24 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleAuthenticatedState(user) {
   const isLoggedIn = Boolean(user);
 
-  // Hide the entire login panel after sign-in
-  authPanel?.classList.toggle("hidden", isLoggedIn);
+  // Hide login panel when logged in
+  authPanel.classList.toggle("hidden", isLoggedIn);
 
-  // Show the request panel after sign-in
-  requestPanel?.classList.toggle("hidden", !isLoggedIn);
+  // Show request panel when logged in
+  requestPanel.classList.toggle("hidden", !isLoggedIn);
 
   if (isLoggedIn) {
     accountEmail.textContent = user.email || "Authenticated user";
+    authForm.reset();
     hideAuthMessage();
-
-    authForm?.reset();
-
-    form?.removeAttribute("disabled");
-    form?.classList.remove("disabled");
-
-    // Keep hidden until there is an actual message
-    formMessage?.classList.add("hidden");
+    hideFormMessage(formMessage);
   } else {
-    form?.setAttribute("disabled", "disabled");
-    form?.classList.add("disabled");
-    formMessage?.classList.add("hidden");
+    accountEmail.textContent = "";
+    requests = [];
+    renderRequests();
+    hideFormMessage(formMessage);
   }
 }
-
   function initializeFirebase() {
     if (!isFirebaseReady) {
       showAuthMessage(
