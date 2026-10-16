@@ -179,7 +179,36 @@ function toggleAuthenticatedState(user) {
     hideFormMessage(formMessage);
   }
 }
-  function formatRequestDate(timestamp) {
+  function initializeFirebase() {
+    if (!isFirebaseReady) {
+      showAuthMessage(
+        "Add your Firebase web config in docs/firebase-config.js before using sign-in.",
+        true
+      );
+      return false;
+    }
+
+    try {
+      firebaseApp = initializeApp(firebaseConfig);
+      firebaseAuth = getAuth(firebaseApp);
+      firebaseDb = getFirestore(firebaseApp);
+      isAnalyticsSupported()
+        .then((supported) => {
+          if (supported) {
+            firebaseAnalytics = getAnalytics(firebaseApp);
+          }
+        })
+        .catch((error) => {
+          console.warn("Firebase analytics is unavailable:", error);
+        });
+      return true;
+    } catch (error) {
+      console.error("Firebase initialization failed:", error);
+      showAuthMessage("Firebase could not be initialized. Check your project settings.", true);
+      return false;
+    }
+  } 
+ function formatRequestDate(timestamp) {
     if (!timestamp) return "Just now";
     const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString(undefined, {
