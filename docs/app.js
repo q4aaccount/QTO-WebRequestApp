@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const userAccount = document.getElementById("user-account");
   const accountEmail = document.getElementById("account-email");
    const accountName = document.getElementById("account-name");
+      const accountAvatar = document.getElementById("account-avatar");
   const authEmail = document.getElementById("auth-email");
   const authPassword = document.getElementById("auth-password");
   const signOutButton = document.getElementById("sign-out-btn");
