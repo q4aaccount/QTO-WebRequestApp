@@ -504,6 +504,7 @@ function toggleAuthenticatedState(user) {
 if (initializeFirebase()) {
   onAuthStateChanged(
     firebaseAuth,
+
     async (user) => {
       currentUser = user;
 
@@ -519,10 +520,17 @@ if (initializeFirebase()) {
         await loadProjectData();
         listenForUserRequests(user);
       } else {
+        // Stop the existing Firestore listener after sign-out.
+        if (unsubscribeRequests) {
+          unsubscribeRequests();
+          unsubscribeRequests = null;
+        }
+
         requests = [];
         renderRequests();
       }
     },
+
     (error) => {
       console.error("Authentication state error:", error);
 
@@ -536,34 +544,3 @@ if (initializeFirebase()) {
     }
   );
 }
-  loadProjectData();
-
-  onAuthStateChanged(
-    firebaseAuth,
-
-    (user) => {
-      console.log(
-        user
-          ? `Signed in as ${user.email}`
-          : "No authenticated user"
-      );
-
-      currentUser = user;
-      toggleAuthenticatedState(user);
-      listenForUserRequests(user);
-    },
-
-    (error) => {
-      console.error("Authentication state error:", error);
-
-      currentUser = null;
-      toggleAuthenticatedState(null);
-
-      showAuthMessage(
-        "Unable to determine your login status.",
-        true
-      );
-    }
-  );
-
-});
