@@ -108,19 +108,40 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleAuthenticatedState(user) {
   const isLoggedIn = Boolean(user);
 
-  // Hide login panel when logged in
-  authPanel.classList.toggle("hidden", isLoggedIn);
+  console.log("Authentication state:", {
+    isLoggedIn,
+    email: user?.email,
+    authPanel,
+    requestPanel
+  });
 
-  // Show request panel when logged in
+  if (!authPanel || !requestPanel) {
+    console.error("Authentication or request panel was not found.", {
+      authPanel,
+      requestPanel
+    });
+    return;
+  }
+
+  // Logged out: show login and hide request form.
+  // Logged in: hide login and show request form.
+  authPanel.classList.toggle("hidden", isLoggedIn);
   requestPanel.classList.toggle("hidden", !isLoggedIn);
 
   if (isLoggedIn) {
-    accountEmail.textContent = user.email || "Authenticated user";
-    authForm.reset();
+    if (accountEmail) {
+      accountEmail.textContent =
+        user.email || "Authenticated user";
+    }
+
+    authForm?.reset();
     hideAuthMessage();
     hideFormMessage(formMessage);
   } else {
-    accountEmail.textContent = "";
+    if (accountEmail) {
+      accountEmail.textContent = "";
+    }
+
     requests = [];
     renderRequests();
     hideFormMessage(formMessage);
@@ -481,11 +502,34 @@ function toggleAuthenticatedState(user) {
   setAuthMode("login");
 
   if (initializeFirebase()) {
-    loadProjectData();
-    onAuthStateChanged(firebaseAuth, (user) => {
+  loadProjectData();
+
+  onAuthStateChanged(
+    firebaseAuth,
+
+    (user) => {
+      console.log(
+        user
+          ? `Signed in as ${user.email}`
+          : "No authenticated user"
+      );
+
       currentUser = user;
       toggleAuthenticatedState(user);
       listenForUserRequests(user);
-    });
-  }
+    },
+
+    (error) => {
+      console.error("Authentication state error:", error);
+
+      currentUser = null;
+      toggleAuthenticatedState(null);
+
+      showAuthMessage(
+        "Unable to determine your login status.",
+        true
+      );
+    }
+  );
+}
 });
