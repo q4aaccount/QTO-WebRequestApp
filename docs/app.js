@@ -22,7 +22,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-	const authPanel = document.getElementById("auth-panel");
+  const authPanel = document.getElementById("auth-panel");
   const projectSelect = document.getElementById("project-select");
   const elevationSelect = document.getElementById("elevation-select");
   const scopeSelect = document.getElementById("scope-select");
