@@ -40,6 +40,28 @@
             <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg" alt="Instagram" />
           </a>
         </div>
+		<div id="user-account" class="sidebar-account hidden">
+  <div class="sidebar-user-details">
+    <div id="account-avatar" class="account-avatar">
+      U
+    </div>
+
+    <div class="account-text">
+      <span class="account-label">Signed in as</span>
+      <strong id="account-name">User</strong>
+      <span id="account-email"></span>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    id="sign-out-btn"
+    class="sidebar-sign-out"
+  >
+    Log out
+  </button>
+</div>
+
       </aside>
 
       <main class="content">
@@ -78,7 +100,6 @@
                   <div id="user-account" class="user-account hidden">
                     <p class="user-account-label">Signed in as</p>
                     <strong id="account-email">Authenticated user</strong>
-                    <button type="button" id="sign-out-btn" class="secondary-button">Sign out</button>
                   </div>
 
                   <div id="auth-message" class="message hidden" aria-live="polite"></div>
