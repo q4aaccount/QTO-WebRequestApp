@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>QTO Administration</title>
+
+  <meta
+    name="description"
+    content="QTO administrative dashboard for managing users, projects, and submitted requests."
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  ./admin.css
+</head>
+
+<body>
+  <div class="admin-shell">
+
+    <!-- Left navigation -->
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <div class="admin-brand-mark">
+          <span class="admin-brand-q">Q</span>
+          <span class="admin-brand-4a">4A</span>
+        </div>
+
+        <div>
+          <strong>QTO Admin</strong>
+          <span>Management portal</span>
+        </div>
+      </div>
+
+      <nav
+        class="admin-navigation"
+        aria-label="Administration sections"
+      >
+        <button
+          type="button"
+          class="admin-nav-button is-active"
+          data-admin-page="dashboard"
+        >
+          <span class="admin-nav-icon">⌂</span>
+          <span>Dashboard</span>
+        </button>
+
+        <button
+          type="button"
+          class="admin-nav-button"
+          data-admin-page="users"
+        >
+          <span class="admin-nav-icon">♙</span>
+          <span>Users</span>
+
+          <span
+            id="sidebar-users-count"
+            class="admin-nav-count"
+          >
+            0
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="admin-nav-button"
+          data-admin-page="projects"
+        >
+          <span class="admin-nav-icon">▣</span>
+          <span>Projects</span>
+
+          <span
+            id="sidebar-projects-count"
+            class="admin-nav-count"
+          >
+            0
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="admin-nav-button"
+          data-admin-page="requests"
+        >
+          <span class="admin-nav-icon">✓</span>
+          <span>Requests</span>
+
+          <span
+            id="sidebar-requests-count"
+            class="admin-nav-count"
+          >
+            0
+          </span>
+        </button>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        ./index.html
+          ← Return to request portal
+        </a>
+
+        <div class="admin-account">
+          <div
+            id="admin-avatar"
+            class="admin-avatar"
+          >
+            A
+          </div>
+
+          <div class="admin-account-details">
+            <strong id="admin-account-name">
+              Administrator
+            </strong>
+
+            <span id="admin-account-email">
+              Loading account...
+            </span>
+          </div>
+
+          <button
+            type="button"
+            id="admin-logout-button"
+            class="icon-button"
+            title="Log out"
+            aria-label="Log out"
+          >
+            ↪
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main area -->
+    <main class="admin-main">
+
+      <!-- Top bar -->
+      <header class="admin-topbar">
+        <div>
+          <p class="admin-eyebrow">
+            Administration
+          </p>
+
+          <h1 id="admin-page-title">
+            Dashboard
+          </h1>
+        </div>
+
+        <div class="admin-topbar-actions">
+          <label class="admin-global-search">
+            <span class="visually-hidden">
+              Search administration records
+            </span>
+
+            <span class="search-icon">⌕</span>
+
+            <input
+              id="admin-global-search-input"
+              type="search"
+              placeholder="Search users, projects or requests"
+              autocomplete="off"
+            />
+          </label>
+
+          <button
+            type="button"
+            id="admin-primary-action"
+            class="primary-button"
+            data-action="create-project"
+          >
+            <span>＋</span>
+            Create project
+          </button>
+        </div>
+      </header>
+
+      <div class="admin-content">
+
+        <!-- Dashboard page -->
+        <section
+          id="admin-dashboard-page"
+          class="admin-page is-active"
+          data-admin-panel="dashboard"
+        >
+          <div class="summary-grid">
+            <article class="summary-card">
+              <div class="summary-card-header">
+                <span class="summary-icon users-icon">
+                  ♙
+                </span>
+
+                <span class="summary-label">
+                  Registered users
+                </span>
+              </div>
+
+              <strong
+                id="dashboard-users-count"
+                class="summary-value"
+              >
+                0
+              </strong>
+
+              <button
+                type="button"
+                class="summary-link"
+                data-navigate-to="users"
+              >
+                View users →
+              </button>
+            </article>
+
+            <article class="summary-card">
+              <div class="summary-card-header">
+                <span class="summary-icon projects-icon">
+                  ▣
+                </span>
+
+                <span class="summary-label">
+                  Active projects
+                </span>
+              </div>
+
+              <strong
+                id="dashboard-projects-count"
+                class="summary-value"
+              >
+                0
+              </strong>
+
+              <button
+                type="button"
+                class="summary-link"
+                data-navigate-to="projects"
+              >
+                View projects →
+              </button>
+            </article>
+
+            <article class="summary-card">
+              <div class="summary-card-header">
+                <span class="summary-icon requests-icon">
+                  ✓
+                </span>
+
+                <span class="summary-label">
+                  Total requests
+                </span>
+              </div>
+
+              <strong
+                id="dashboard-requests-count"
+                class="summary-value"
+              >
+                0
+              </strong>
+
+              <button
+                type="button"
+                class="summary-link"
+                data-navigate-to="requests"
+              >
+                View requests →
+              </button>
+            </article>
+
+            <article class="summary-card">
+              <div class="summary-card-header">
+                <span class="summary-icon pending-icon">
+                  ◷
+                </span>
+
+                <span class="summary-label">
+                  Awaiting review
+                </span>
+              </div>
+
+              <strong
+                id="dashboard-pending-count"
+                class="summary-value"
+              >
+                0
+              </strong>
+
+              <button
+                type="button"
+                class="summary-link"
+                data-request-filter="submitted"
+              >
+                Review requests →
+              </button>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="admin-card">
+              <div class="admin-card-header">
+                <div>
+                  <p class="admin-card-eyebrow">
+                    Current activity
+                  </p>
+
+                  <h2>Recent requests</h2>
+                </div>
+
+                <button
+                  type="button"
+                  class="text-button"
+                  data-navigate-to="requests"
+                >
+                  View all
+                </button>
+              </div>
+
+              <div
+                id="dashboard-recent-requests"
+                class="dashboard-request-list"
+              >
+                <div class="empty-admin-state">
+                  <span class="empty-state-icon">✓</span>
+                  <strong>No requests loaded</strong>
+                  <p>
+                    Recent submitted requests will appear here.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <aside class="admin-card quick-actions-card">
+              <div class="admin-card-header">
+                <div>
+                  <p class="admin-card-eyebrow">
+                    Shortcuts
+                  </p>
+
+                  <h2>Quick actions</h2>
+                </div>
+              </div>
+
+              <div class="quick-actions-list">
+                <button
+                  type="button"
+                  class="quick-action-button"
+                  data-action="create-user"
+                >
+                  <span class="quick-action-icon">＋</span>
+
+                  <span>
+                    <strong>Create user</strong>
+                    <small>
+                      Add a new user account
+                    </small>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  class="quick-action-button"
+                  data-action="create-project"
+                >
+                  <span class="quick-action-icon">▣</span>
+
+                  <span>
+                    <strong>Create project</strong>
+                    <small>
+                      Create and assign a project
+                    </small>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  class="quick-action-button"
+                  data-navigate-to="requests"
+                >
+                  <span class="quick-action-icon">✓</span>
+
+                  <span>
+                    <strong>Review requests</strong>
+                    <small>
+                      Update request statuses
+                    </small>
+                  </span>
+                </button>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- Users page -->
+        <section
+          id="admin-users-page"
+          class="admin-page"
+          data-admin-panel="users"
+        >
+          <div class="section-toolbar">
+            <div>
+              <h2>Users</h2>
+
+              <p>
+                Manage user accounts and assigned projects.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="primary-button"
+              data-action="create-user"
+            >
+              <span>＋</span>
+              Create user
+            </button>
+          </div>
+
+          <section class="admin-card">
+            <div class="data-toolbar">
+              <label class="table-search">
+                <span class="search-icon">⌕</span>
+
+                <input
+                  id="users-search-input"
+                  type="search"
+                  placeholder="Search users"
+                />
+              </label>
+
+              <select
+                id="users-role-filter"
+                class="admin-filter"
+                aria-label="Filter users by role"
+              >
+                <option value="all">
+                  All roles
+                </option>
+
+                <option value="user">
+                  Users
+                </option>
+
+                <option value="admin">
+                  Administrators
+                </option>
+              </select>
+
+              <select
+                id="users-status-filter"
+                class="admin-filter"
+                aria-label="Filter users by status"
+              >
+                <option value="all">
+                  All statuses
+                </option>
+
+                <option value="active">
+                  Active
+                </option>
+
+                <option value="inactive">
+                  Inactive
+                </option>
+              </select>
+            </div>
+
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Projects</th>
+                    <th>Requests</th>
+                    <th>Status</th>
+                    <th>Last sign-in</th>
+                    <th>
+                      <span class="visually-hidden">
+                        Actions
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody id="admin-users-table-body">
+                  <tr>
+                    <td colspan="7">
+                      <div class="empty-table-state">
+                        No users have been loaded.
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <!-- Projects page -->
+        <section
+          id="admin-projects-page"
+          class="admin-page"
+          data-admin-panel="projects"
+        >
+          <div class="section-toolbar">
+            <div>
+              <h2>Projects</h2>
+
+              <p>
+                Create projects, assign users, and manage
+                project properties.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="primary-button"
+              data-action="create-project"
+            >
+              <span>＋</span>
+              Create project
+            </button>
+          </div>
+
+          <section class="admin-card">
+            <div class="data-toolbar">
+              <label class="table-search">
+                <span class="search-icon">⌕</span>
+
+                <input
+                  id="projects-search-input"
+                  type="search"
+                  placeholder="Search projects"
+                />
+              </label>
+
+              <select
+                id="projects-status-filter"
+                class="admin-filter"
+                aria-label="Filter projects by status"
+              >
+                <option value="all">
+                  All statuses
+                </option>
+
+                <option value="active">
+                  Active
+                </option>
+
+                <option value="inactive">
+                  Inactive
+                </option>
+
+                <option value="completed">
+                  Completed
+                </option>
+              </select>
+            </div>
+
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Assigned users</th>
+                    <th>Elevations</th>
+                    <th>Requests</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                    <th>
+                      <span class="visually-hidden">
+                        Actions
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody id="admin-projects-table-body">
+                  <tr>
+                    <td colspan="7">
+                      <div class="empty-table-state">
+                        No projects have been loaded.
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <!-- Requests page -->
+        <section
+          id="admin-requests-page"
+          class="admin-page"
+          data-admin-panel="requests"
+        >
+          <div class="section-toolbar">
+            <div>
+              <h2>Submitted requests</h2>
+
+              <p>
+                Review requests and update their workflow
+                status.
+              </p>
+            </div>
+          </div>
+
+          <section class="admin-card">
+            <div class="data-toolbar request-toolbar">
+              <label class="table-search">
+                <span class="search-icon">⌕</span>
+
+                <input
+                  id="requests-search-input"
+                  type="search"
+                  placeholder="Search requests"
+                />
+              </label>
+
+              <select
+                id="requests-status-filter"
+                class="admin-filter"
+                aria-label="Filter requests by status"
+              >
+                <option value="all">
+                  All statuses
+                </option>
+
+                <option value="submitted">
+                  Submitted
+                </option>
+
+                <option value="reviewing">
+                  Reviewing
+                </option>
+
+                <option value="in-progress">
+                  In progress
+                </option>
+
+                <option value="completed">
+                  Completed
+                </option>
+
+                <option value="rejected">
+                  Rejected
+                </option>
+              </select>
+
+              <select
+                id="requests-project-filter"
+                class="admin-filter"
+                aria-label="Filter requests by project"
+              >
+                <option value="all">
+                  All projects
+                </option>
+              </select>
+            </div>
+
+            <div class="admin-table-wrapper">
+              <table class="admin-table request-table">
+                <thead>
+                  <tr>
+                    <th>Request</th>
+                    <th>User</th>
+                    <th>Project</th>
+                    <th>Scope</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>
+                      <span class="visually-hidden">
+                        Actions
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody id="admin-requests-table-body">
+                  <tr>
+                    <td colspan="7">
+                      <div class="empty-table-state">
+                        No requests have been loaded.
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Detail drawer -->
+  <div
+    id="admin-drawer-overlay"
+    class="drawer-overlay hidden"
+  ></div>
+
+  <aside
+    id="admin-detail-drawer"
+    class="admin-drawer"
+    aria-hidden="true"
+    aria-label="Record details"
+  >
+    <header class="drawer-header">
+      <div>
+        <p
+          id="drawer-eyebrow"
+          class="admin-card-eyebrow"
+        >
+          Details
+        </p>
+
+        <h2 id="drawer-title">
+          Record details
+        </h2>
+      </div>
+
+      <button
+        type="button"
+        id="close-admin-drawer"
+        class="icon-button drawer-close-button"
+        aria-label="Close details"
+      >
+        ×
+      </button>
+    </header>
+
+    <div
+      id="admin-drawer-content"
+      class="drawer-content"
+    ></div>
+  </aside>
+
+  <!-- Create/edit modal -->
+  <div
+    id="admin-modal-overlay"
+    class="modal-overlay hidden"
+  >
+    <section
+      id="admin-modal"
+      class="admin-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-modal-title"
+    >
+      <header class="modal-header">
+        <div>
+          <p
+            id="admin-modal-eyebrow"
+            class="admin-card-eyebrow"
+          >
+            Administration
+          </p>
+
+          <h2 id="admin-modal-title">
+            Create record
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          id="close-admin-modal"
+          class="icon-button"
+          aria-label="Close dialog"
+        >
+          ×
+        </button>
+      </header>
+
+      <div
+        id="admin-modal-content"
+        class="modal-content"
+      ></div>
+    </section>
+  </div>
+
+  <!-- Delete confirmation dialog -->
+  <div
+    id="delete-modal-overlay"
+    class="modal-overlay hidden"
+  >
+    <section
+      class="admin-modal confirmation-modal"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-title"
+    >
+      <div class="danger-icon">
+        !
+      </div>
+
+      <h2 id="delete-modal-title">
+        Remove this item?
+      </h2>
+
+      <p id="delete-modal-message">
+        This operation cannot be undone.
+      </p>
+
+      <div class="confirmation-actions">
+        <button
+          type="button"
+          id="cancel-delete-button"
+          class="secondary-button"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          id="confirm-delete-button"
+          class="danger-button"
+        >
+          Remove
+        </button>
+      </div>
+    </section>
+  </div>
+
+  ./firebase-config.jsscript>
+
+  ./admin.jsscript>
+</body>
+</html>
