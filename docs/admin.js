@@ -20,15 +20,15 @@ import {
  * ============================================================
  */
 
-const firebaseConfig = window.f*rebaseConfig || {};
+const firebaseConfig = window.firebaseConfig || {};
 
-const isFireb*seConfigured = Boolean(
-  firebase*onfig.apiKey &&
-  firebaseConfig.a*iKey !== "YOUR_API_KEY"
+const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey &&
+  firebaseConfig.apiKey !== "YOUR_API_KEY"
 );
 
-if (!i*FirebaseConfigured) {
-  console.er*or(
+if (!isFirebaseConfigured) {
+  console.error(
     "Firebase configuration is missing. Check firebase-config.js."
   );
 }
@@ -37,6 +37,8 @@ const firebaseApp = initializeApp(firebaseConfig);
 const firebaseAuth = getAuth(firebaseApp);
 const firebaseDb = getFirestore(firebaseApp);
 
+console.log("admin.js loaded successfully");
+
 /*
  * ============================================================
  * DOM elements
@@ -44,127 +46,130 @@ const firebaseDb = getFirestore(firebaseApp);
  */
 
 // Main navigation
-const n*vigationButtons = Array.from(
-  do*ument.querySelectorAll("[data-admin-page]")
+const navigationButtons = Array.from(
+  document.querySelectorAll("[data-admin-page]")
 );
 
-const administrationP*ges = Array.from(
-  document.query*electorAll("[data-admin-panel]")
-)*
+const administrationPages = Array.from(
+  document.querySelectorAll("[data-admin-panel]")
+);
 
 const pageTitle =
-  document.get*lementById("admin-page-title");
+  document.getElementById("admin-page-title");
 
-c*nst primaryActionButton =
-  docume*t.getElementById("admin-primary-ac*ion");
+const primaryActionButton =
+  document.getElementById("admin-primary-action");
 
-const navigationLinks = Ar*ay.from(
-  document.querySelectorA*l("[data-navigate-to]")
+const navigationLinks = Array.from(
+  document.querySelectorAll("[data-navigate-to]")
 );
 
-const *ctionButtons = Array.from(
-  docum*nt.querySelectorAll("[data-action]*)
+const actionButtons = Array.from(
+  document.querySelectorAll("[data-action]")
 );
 
-// Admin account area
-const *dminAccountName =
-  document.getEl*mentById("admin-account-name");
+// Administrator account
+const adminAccountName =
+  document.getElementById("admin-account-name");
 
-c*nst adminAccountEmail =
-  document*getElementById("admin-account-emai*");
+const adminAccountEmail =
+  document.getElementById("admin-account-email");
 
 const adminAvatar =
-  documen*.getElementById("admin-avatar");
+  document.getElementById("admin-avatar");
 
-*onst adminLogoutButton =
-  documen*.getElementById("admin-logout-butt*n");
+const adminLogoutButton =
+  document.getElementById("admin-logout-button");
 
 // Modal
-const modalOverlay *
-  document.getElementById("admin-*odal-overlay");
+const modalOverlay =
+  document.getElementById("admin-modal-overlay");
 
-const modalTitle *
-  document.getElementById("admin-*odal-title");
+const modalTitle =
+  document.getElementById("admin-modal-title");
 
-const modalEyebrow *
-  document.getElementById("admin-*odal-eyebrow");
+const modalEyebrow =
+  document.getElementById("admin-modal-eyebrow");
 
-const modalConten* =
-  document.getElementById("admi*-modal-content");
+const modalContent =
+  document.getElementById("admin-modal-content");
 
-const closeModa*Button =
-  document.getElementById*"close-admin-modal");
+const closeModalButton =
+  document.getElementById("close-admin-modal");
 
-// Detail d*awer
+// Detail drawer
 const drawer =
-  document.get*lementById("admin-detail-drawer");*
+  document.getElementById("admin-detail-drawer");
+
 const drawerOverlay =
-  document.*etElementById("admin-drawer-overla*");
+  document.getElementById("admin-drawer-overlay");
 
 const closeDrawerButton =
-  d*cument.getElementById("close-admin*drawer");
+  document.getElementById("close-admin-drawer");
 
 const drawerEyebrow =
- *document.getElementById("drawer-ey*brow");
+  document.getElementById("drawer-eyebrow");
 
 const drawerTitle =
-  doc*ment.getElementById("drawer-title"*;
+  document.getElementById("drawer-title");
 
 const drawerContent =
-  documen*.getElementById("admin-drawer-cont*nt");
+  document.getElementById("admin-drawer-content");
 
-// Delete confirmation
-cons* deleteModalOverlay =
-  document.g*tElementById("delete-modal-overlay*);
+// Delete confirmation dialog
+const deleteModalOverlay =
+  document.getElementById("delete-modal-overlay");
 
 const deleteModalMessage =
-  d*cument.getElementById("delete-moda*-message");
+  document.getElementById("delete-modal-message");
 
-const cancelDeleteBut*on =
-  document.getElementById("ca*cel-delete-button");
+const cancelDeleteButton =
+  document.getElementById("cancel-delete-button");
 
-const confir*DeleteButton =
-  document.getEleme*tById("confirm-delete-button");
+const confirmDeleteButton =
+  document.getElementById("confirm-delete-button");
 
-/* Dashboard and table elements
-cons* dashboardUsersCount =
-  document.*etElementById("dashboard-users-cou*t");
+// Dashboard counts
+const dashboardUsersCount =
+  document.getElementById("dashboard-users-count");
 
-const dashboardProjectsCount*=
-  document.getElementById("dashb*ard-projects-count");
+const dashboardProjectsCount =
+  document.getElementById("dashboard-projects-count");
 
-const dashb*ardRequestsCount =
-  document.getE*ementById("dashboard-requests-coun*");
+const dashboardRequestsCount =
+  document.getElementById("dashboard-requests-count");
 
-const dashboardPendingCount =*  document.getElementById("dashboa*d-pending-count");
+const dashboardPendingCount =
+  document.getElementById("dashboard-pending-count");
 
-const sidebarU*ersCount =
-  document.getElementBy*d("sidebar-users-count");
+const sidebarUsersCount =
+  document.getElementById("sidebar-users-count");
 
-const s*debarProjectsCount =
-  document.ge*ElementById("sidebar-projects-coun*");
+const sidebarProjectsCount =
+  document.getElementById("sidebar-projects-count");
 
 const sidebarRequestsCount =
-* document.getElementById("sidebar-*equests-count");
+  document.getElementById("sidebar-requests-count");
 
-const usersTable*ody =
-  document.getElementById("a*min-users-table-body");
+// Tables
+const usersTableBody =
+  document.getElementById("admin-users-table-body");
 
-const pro*ectsTableBody =
-  document.getElem*ntById("admin-projects-table-body"*;
+const projectsTableBody =
+  document.getElementById("admin-projects-table-body");
 
 const requestsTableBody =
-  doc*ment.getElementById("admin-request*-table-body");
+  document.getElementById("admin-requests-table-body");
 
-// Search and filt*rs
+// Search and filters
 const globalSearchInput =
-  doc*ment.getElementById("admin-global-*earch-input");
+  document.getElementById("admin-global-search-input");
 
-const usersSearchI*put =
-  document.getElementById("u*ers-search-input");
+const usersSearchInput =
+  document.getElementById("users-search-input");
 
-const usersRo*eFilter =
-  document.getElementByI*("users-role-filter");
+const usersRoleFilter =
+  document.getElementById("users-role-filter");
 
 const usersStatusFilter =
   document.getElementById("users-status-filter");
@@ -214,14 +219,14 @@ const pageConfiguration = {
 
   requests: {
     title: "Submitted requests",
-    primaryAction: "Review requests",
+    primaryAction: "",
     action: ""
   }
 };
 
 /*
  * ============================================================
- * General utility functions
+ * Utility functions
  * ============================================================
  */
 
@@ -254,45 +259,46 @@ function setAdminInterfaceEnabled(isEnabled) {
  * ============================================================
  */
 
-function navigateToPage(*ageName) {
-  const configuration =*    pageConfiguration[pageName];
+function navigateToPage(pageName) {
+  const configuration =
+    pageConfiguration[pageName];
 
-* if (!configuration) {
-    console*warn(
-      `Unknown administratio* page: ${pageName}`
+  if (!configuration) {
+    console.warn(
+      `Unknown administration page: ${pageName}`
     );
 
-    re*urn;
+    return;
   }
 
-  navigationButtons.forE*ch((button) => {
-    const isActiv* =
-      button.dataset.adminPage *== pageName;
+  navigationButtons.forEach((button) => {
+    const isActive =
+      button.dataset.adminPage === pageName;
 
-    button.classList*toggle(
+    button.classList.toggle(
       "is-active",
-      i*Active
+      isActive
     );
 
-    button.setAttri*ute(
+    button.setAttribute(
       "aria-selected",
-      *tring(isActive)
+      String(isActive)
     );
   });
 
-  ad*inistrationPages.forEach((page) =>*{
+  administrationPages.forEach((page) => {
     const isActive =
-      page.*ataset.adminPanel === pageName;
+      page.dataset.adminPanel === pageName;
 
- *  page.classList.toggle(
-      "is*active",
+    page.classList.toggle(
+      "is-active",
       isActive
     );
-  }*;
+  });
 
   if (pageTitle) {
-    pageTitl*.textContent =
-      configuration*title;
+    pageTitle.textContent =
+      configuration.title;
   }
 
   if (!primaryActionButton) {
@@ -327,82 +333,83 @@ function navigateToPage(*ageName) {
  */
 
 function getCreateUserForm() {
-* return `
+  return `
     <form
-      id="admi*-create-user-form"
-      class="ad*in-form"
+      id="admin-create-user-form"
+      class="admin-form"
     >
-      <div class="f*rm-grid">
+      <div class="form-grid">
         <label>
-        * Full name
+          Full name
 
           <input
-     *      id="create-user-name"
-      *     type="text"
-            place*older="Enter the user's name"
-    *       autocomplete="name"
-       *    required
+            id="create-user-name"
+            type="text"
+            placeholder="Enter the user's name"
+            autocomplete="name"
+            required
           />
-        */label>
+        </label>
 
         <label>
-         *Email
+          Email
 
           <input
-          * id="create-user-email"
-          * type="email"
-            placehol*er="user@example.com"
-            *utocomplete="email"
-            re*uired
+            id="create-user-email"
+            type="email"
+            placeholder="user@example.com"
+            autocomplete="email"
+            required
           />
-        </label*
+        </label>
       </div>
 
-      <div class="f*rm-grid">
+      <div class="form-grid">
         <label>
-        * Role
+          Role
 
-          <select id="creat*-user-role">
-            <option v*lue="user">
+          <select id="create-user-role">
+            <option value="user">
               User
-   *        </option>
-
-            <op*ion value="admin">
-              A*ministrator
             </option>
-*         </select>
-        </label*
+
+            <option value="admin">
+              Administrator
+            </option>
+          </select>
+        </label>
 
         <label>
-          Accoun* status
+          Account status
 
-          <select id="cre*te-user-status">
-            <opti*n value="active">
-              Ac*ive
+          <select id="create-user-status">
+            <option value="active">
+              Active
             </option>
 
-       *    <option value="inactive">
-    *         Inactive
-            </op*ion>
+            <option value="inactive">
+              Inactive
+            </option>
           </select>
-        <*label>
+        </label>
       </div>
 
-      <label>*        Temporary password
+      <label>
+        Temporary password
 
-      * <input
-          id="create-user-*assword"
-          type="password"*          minlength="6"
-          *laceholder="Minimum 6 characters"
-*         autocomplete="new-passwor*"
+        <input
+          id="create-user-password"
+          type="password"
+          minlength="6"
+          placeholder="Minimum 6 characters"
+          autocomplete="new-password"
           required
         />
-  *   </label>
+      </label>
 
-      <p class="form-*elp">
-        The form is currentl* part of the interface design.
-   *    Secure Authentication account *reation will be connected
-        *hrough a backend service in the next implementation step.
+      <p class="form-help">
+        The Create User interface is ready. Secure account
+        creation will be connected to a backend service later.
       </p>
 
       <div
@@ -437,71 +444,74 @@ function getCreateUserForm() {
  * ============================================================
  */
 
-function getCreateProjectForm()*{
+function getCreateProjectForm() {
   return `
     <form
-      id="a*min-create-project-form"
-      cla*s="admin-form"
+      id="admin-create-project-form"
+      class="admin-form"
     >
-      <label>*        Project name
+      <label>
+        Project name
 
-        <inp*t
-          id="create-project-nam*"
+        <input
+          id="create-project-name"
           type="text"
-          *laceholder="Enter a project name"
-*         required
+          placeholder="Enter a project name"
+          required
         />
-     *</label>
+      </label>
 
-      <div class="form-g*id">
+      <div class="form-grid">
         <label>
-          Pro*ect status
+          Project status
 
-          <select id="*reate-project-status">
-           *<option value="active">
-          *   Active
+          <select id="create-project-status">
+            <option value="active">
+              Active
             </option>
 
- *          <option value="inactive"*
+            <option value="inactive">
               Inactive
-          * </option>
-
-            <option va*ue="completed">
-              Comp*eted
             </option>
-       *  </select>
+
+            <option value="completed">
+              Completed
+            </option>
+          </select>
         </label>
 
-    *   <label>
+        <label>
           Project code
-*          <input
-            id="c*eate-project-code"
-            typ*="text"
-            placeholder="E*ample: NT-001"
+
+          <input
+            id="create-project-code"
+            type="text"
+            placeholder="Example: NT-001"
           />
-      * </label>
+        </label>
       </div>
 
-      <lab*l>
+      <label>
         Elevations
 
-        <te*tarea
-          id="create-project*elevations"
+        <textarea
+          id="create-project-elevations"
           rows="5"
-   *      placeholder="Enter one eleva*ion per line"
+          placeholder="Enter one elevation per line"
           required
- *      ></textarea>
+        ></textarea>
       </label>
-*      <fieldset>
-        <legend>A*sign users</legend>
+
+      <fieldset>
+        <legend>Assign users</legend>
 
         <div
-*         id="create-project-user-o*tions"
-          class="selection-*ist"
+          id="create-project-user-options"
+          class="selection-list"
         >
-          <p class=*form-help">
-            Registered*users will appear here after the u*ers
-            collection is conn*cted to this page.
+          <p class="form-help">
+            Registered users will appear here after the users
+            collection is connected to this page.
           </p>
         </div>
       </fieldset>
@@ -534,118 +544,122 @@ function getCreateProjectForm()*{
 
 /*
  * ============================================================
- * Modal controls
+ * Modal functions
  * ============================================================
  */
 
-function attachModalF*rmEvents(action) {
-  if (action ==* "create-user") {
-    const create*serForm =
-      document.getElemen*ById(
-        "admin-create-user-f*rm"
+function attachModalFormEvents(action) {
+  if (action === "create-user") {
+    const createUserForm =
+      document.getElementById(
+        "admin-create-user-form"
       );
 
-    createUserForm?.*ddEventListener(
+    createUserForm?.addEventListener(
       "submit",
- *    handleCreateUserDesignSubmit
- *  );
+      handleCreateUserDesignSubmit
+    );
   }
 
-  if (action === "create*project") {
-    const createProjec*Form =
-      document.getElementBy*d(
-        "admin-create-project-f*rm"
+  if (action === "create-project") {
+    const createProjectForm =
+      document.getElementById(
+        "admin-create-project-form"
       );
 
-    createProjectFor*?.addEventListener(
-      "submit"*
-      handleCreateProjectDesignSu*mit
+    createProjectForm?.addEventListener(
+      "submit",
+      handleCreateProjectDesignSubmit
     );
   }
 
   modalContent
-   *?.querySelector("[data-close-modal]")
+    ?.querySelector("[data-close-modal]")
     ?.addEventListener(
-      "*lick",
+      "click",
       closeActionModal
-    *;
+    );
 }
 
-function openActionModal(acti*n) {
+function openActionModal(action) {
   if (
     !modalOverlay ||
- *  !modalContent ||
-    !modalTitle*||
+    !modalContent ||
+    !modalTitle ||
     !modalEyebrow
   ) {
-    con*ole.error(
-      "The administrati*n modal elements were not found."
-*   );
+    console.error(
+      "The administration modal elements were not found."
+    );
 
     return;
   }
 
-  if (acti*n === "create-user") {
-    modalEy*brow.textContent =
-      "User man*gement";
+  if (action === "create-user") {
+    modalEyebrow.textContent =
+      "User management";
 
-    modalTitle.textConte*t =
+    modalTitle.textContent =
       "Create user";
 
-    moda*Content.innerHTML =
-      getCreat*UserForm();
-  } else if (action ==* "create-project") {
-    modalEyeb*ow.textContent =
-      "Project ma*agement";
+    modalContent.innerHTML =
+      getCreateUserForm();
+  } else if (action === "create-project") {
+    modalEyebrow.textContent =
+      "Project management";
 
-    modalTitle.textCont*nt =
+    modalTitle.textContent =
       "Create project";
 
-    *odalContent.innerHTML =
-      getC*eateProjectForm();
+    modalContent.innerHTML =
+      getCreateProjectForm();
   } else {
-    *onsole.warn(
-      `Unknown admini*tration action: ${action}`
+    console.warn(
+      `Unknown administration action: ${action}`
     );
-*    return;
+
+    return;
   }
 
-  modalOverlay.cl*ssList.remove("hidden");
-  documen*.body.style.overflow = "hidden";
+  modalOverlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 
-* attachModalFormEvents(action);
+  attachModalFormEvents(action);
 
- *window.setTimeout(() => {
-    moda*Content
-      .querySelector("inpu*, select, textarea")
-      ?.focus*);
+  window.setTimeout(() => {
+    modalContent
+      .querySelector("input, select, textarea")
+      ?.focus();
   }, 0);
 }
 
-function closeActio*Modal() {
-  if (!modalOverlay || !*odalContent) {
+function closeActionModal() {
+  if (!modalOverlay || !modalContent) {
     return;
   }
 
-  *odalOverlay.classList.add("hidden"*;
-  document.body.style.overflow =*"";
-  modalContent.innerHTML = "";*}
+  modalOverlay.classList.add("hidden");
+  document.body.style.overflow = "";
+  modalContent.innerHTML = "";
+}
 
-function handleCreateUserDesign*ubmit(event) {
-  event.preventDefa*lt();
+function handleCreateUserDesignSubmit(event) {
+  event.preventDefault();
 
   const message =
-    docum*nt.getElementById(
-      "create-u*er-message"
+    document.getElementById(
+      "create-user-message"
     );
 
-  if (message)*{
-    message.textContent =
-      *The Create User interface is ready. The secure backend connection will be added next.";
-
-    message.className =
-      "message success";
+  if (!message) {
+    return;
   }
+
+  message.textContent =
+    "The Create User interface is ready. The secure backend connection will be added next.";
+
+  message.className =
+    "message success";
 }
 
 function handleCreateProjectDesignSubmit(event) {
@@ -656,49 +670,62 @@ function handleCreateProjectDesignSubmit(event) {
       "create-project-message"
     );
 
-  if (message) {
-    message.textContent =
-      "The Create Project interface is ready. Firestore project creation will be added next.";
-
-    message.className =
-      "message success";
+  if (!message) {
+    return;
   }
+
+  message.textContent =
+    "The Create Project interface is ready. Firestore project creation will be added next.";
+
+  message.className =
+    "message success";
 }
 
 /*
  * ============================================================
- * Detail drawer controls
+ * Detail drawer
  * ============================================================
  */
 
 function openDetailDrawer({
-  e*ebrow = "Details",
-  title = "Reco*d details",
+  eyebrow = "Details",
+  title = "Record details",
   content = ""
-} = {})*{
+} = {}) {
   if (
     !drawer ||
-    !drawe*Overlay ||
+    !drawerOverlay ||
     !drawerContent
-  ) *
+  ) {
     return;
   }
 
-  if (drawerEyeb*ow) {
-    drawerEyebrow.textConten* = eyebrow;
+  if (drawerEyebrow) {
+    drawerEyebrow.textContent =
+      eyebrow;
   }
 
-  if (drawerTitle* {
-    drawerTitle.textContent = title;
+  if (drawerTitle) {
+    drawerTitle.textContent =
+      title;
   }
 
-  drawerContent.innerHTML = content;
+  drawerContent.innerHTML =
+    content;
 
-  drawerOverlay.classList.remove("hidden");
+  drawerOverlay.classList.remove(
+    "hidden"
+  );
+
   drawer.classList.add("is-open");
-  drawer.setAttribute("aria-hidden", "false");
 
-  document.body.style.overflow = "hidden";
+  drawer.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.style.overflow =
+    "hidden";
 }
 
 function closeDetailDrawer() {
@@ -707,27 +734,36 @@ function closeDetailDrawer() {
   }
 
   drawer.classList.remove("is-open");
-  drawer.setAttribute("aria-hidden", "true");
 
-  drawerOverlay.classList.add("hidden");
+  drawer.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  drawerOverlay.classList.add(
+    "hidden"
+  );
 
   document.body.style.overflow = "";
 }
 
 /*
  * ============================================================
- * Delete confirmation controls
+ * Delete confirmation
  * ============================================================
  */
 
-function openDeleteConfirmation*{
-  message = "This operation cann*t be undone.",
+function openDeleteConfirmation({
+  message = "This operation cannot be undone.",
   onConfirm = null
 } = {}) {
-  if (!deleteModalOverlay) return;
+  if (!deleteModalOverlay) {
+    return;
+  }
 
   if (deleteModalMessage) {
-    deleteModalMessage.textContent = message;
+    deleteModalMessage.textContent =
+      message;
   }
 
   pendingDeleteHandler =
@@ -739,7 +775,8 @@ function openDeleteConfirmation*{
     "hidden"
   );
 
-  document.body.style.overflow = "hidden";
+  document.body.style.overflow =
+    "hidden";
 }
 
 function closeDeleteConfirmation() {
@@ -753,70 +790,76 @@ function closeDeleteConfirmation() {
 
 /*
  * ============================================================
- * Administrator authentication and authorization
+ * Administrator authentication
  * ============================================================
  */
 
-async function getAdmi*istratorProfile(user) {
-  if (!use* || !firebaseDb) {
-    return null*
+async function getAdministratorProfile(user) {
+  if (!user || !firebaseDb) {
+    return null;
   }
 
-  const userReference = doc(*    firebaseDb,
+  const userReference = doc(
+    firebaseDb,
     "users",
-    u*er.uid
+    user.uid
   );
 
-  const userSnapshot *
+  const userSnapshot =
     await getDoc(userReference);
-*  if (!userSnapshot.exists()) {
-  * console.warn(
-      "No Firestore*user profile exists for:",
-      u*er.uid
+
+  if (!userSnapshot.exists()) {
+    console.warn(
+      "No Firestore user profile exists for:",
+      user.uid
     );
 
-    return null;
-  *
-
-  const profile = userSnapshot.d*ta();
-
-  console.log("Administrato* profile check:", {
-    uid: user.*id,
-    email: user.email,
-    rol*: profile.role,
-    active: profil*.active
-  });
-
-  const normalizedR*le =
-    String(profile.role || ""*
-      .trim()
-      .toLowerCase(*;
-
-  if (normalizedRole !== "admin*) {
     return null;
   }
 
-  if (pr*file.active === false) {
-    conso*e.warn(
-      "The administrator p*ofile is inactive."
+  const profile =
+    userSnapshot.data();
+
+  console.log(
+    "Administrator profile check:",
+    {
+      uid: user.uid,
+      email: user.email,
+      role: profile.role,
+      active: profile.active
+    }
+  );
+
+  const normalizedRole =
+    String(profile.role || "")
+      .trim()
+      .toLowerCase();
+
+  if (normalizedRole !== "admin") {
+    return null;
+  }
+
+  if (profile.active === false) {
+    console.warn(
+      "The administrator profile is inactive."
     );
 
-    re*urn null;
+    return null;
   }
 
   return {
-    uid:*user.uid,
+    uid: user.uid,
     ...profile,
-    role* normalizedRole
+    role: normalizedRole
   };
 }
 
-function d*splayAdministratorProfile(
-  admin*strator,
+function displayAdministratorProfile(
+  administrator,
   authenticationUser
 ) {
-* const email =
-    administrator.e*ail ||
+  const email =
+    administrator.email ||
     authenticationUser.email ||
     "";
 
@@ -849,44 +892,48 @@ function d*splayAdministratorProfile(
 
 /*
  * ============================================================
- * Data loading placeholders
+ * Initial dashboard data
  * ============================================================
- *
- * These will be replaced with Firestore loading functions next.
  */
 
-async function initializeAdminD*shboard() {
-  // Keep temporary co*nts at zero until Firestore loadin* is added.
-  if (dashboardUsersCou*t) {
-    dashboardUsersCount.textContent = "0";
+async function initializeAdminDashboard() {
+  if (dashboardUsersCount) {
+    dashboardUsersCount.textContent =
+      "0";
   }
 
   if (dashboardProjectsCount) {
-    dashboardProjectsCount.textContent = "0";
+    dashboardProjectsCount.textContent =
+      "0";
   }
 
   if (dashboardRequestsCount) {
-    dashboardRequestsCount.textContent = "0";
+    dashboardRequestsCount.textContent =
+      "0";
   }
 
   if (dashboardPendingCount) {
-    dashboardPendingCount.textContent = "0";
+    dashboardPendingCount.textContent =
+      "0";
   }
 
   if (sidebarUsersCount) {
-    sidebarUsersCount.textContent = "0";
+    sidebarUsersCount.textContent =
+      "0";
   }
 
   if (sidebarProjectsCount) {
-    sidebarProjectsCount.textContent = "0";
+    sidebarProjectsCount.textContent =
+      "0";
   }
 
   if (sidebarRequestsCount) {
-    sidebarRequestsCount.textContent = "0";
+    sidebarRequestsCount.textContent =
+      "0";
   }
 
   /*
-   * Firestore functions will be connected here:
+   * Firestore loading will be added here:
    *
    * await Promise.all([
    *   loadUsers(),
@@ -898,38 +945,47 @@ async function initializeAdminD*shboard() {
 
 /*
  * ============================================================
- * Navigation event listeners
+ * Navigation events
  * ============================================================
  */
 
 navigationButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    navigateToPage(
-      button.dataset.adminPage
-    );
-  });
+  button.addEventListener(
+    "click",
+    () => {
+      navigateToPage(
+        button.dataset.adminPage
+      );
+    }
+  );
 });
 
 navigationLinks.forEach((button) => {
-  button.addEventListener("click", () => {
-    const targetPage =
-      button.dataset.navigateTo;
+  button.addEventListener(
+    "click",
+    () => {
+      const targetPage =
+        button.dataset.navigateTo;
 
-    if (targetPage) {
-      navigateToPage(targetPage);
+      if (targetPage) {
+        navigateToPage(targetPage);
+      }
     }
-  });
+  );
 });
 
 actionButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const action =
-      button.dataset.action;
+  button.addEventListener(
+    "click",
+    () => {
+      const action =
+        button.dataset.action;
 
-    if (action) {
-      openActionModal(action);
+      if (action) {
+        openActionModal(action);
+      }
     }
-  });
+  );
 });
 
 primaryActionButton?.addEventListener(
@@ -946,7 +1002,7 @@ primaryActionButton?.addEventListener(
 
 /*
  * ============================================================
- * Modal and drawer event listeners
+ * Modal, drawer and delete events
  * ============================================================
  */
 
@@ -988,7 +1044,9 @@ confirmDeleteButton?.addEventListener(
     }
 
     try {
-      confirmDeleteButton.disabled = true;
+      confirmDeleteButton.disabled =
+        true;
+
       confirmDeleteButton.textContent =
         "Removing...";
 
@@ -1001,7 +1059,9 @@ confirmDeleteButton?.addEventListener(
         error
       );
     } finally {
-      confirmDeleteButton.disabled = false;
+      confirmDeleteButton.disabled =
+        false;
+
       confirmDeleteButton.textContent =
         "Remove";
     }
@@ -1011,7 +1071,10 @@ confirmDeleteButton?.addEventListener(
 deleteModalOverlay?.addEventListener(
   "click",
   (event) => {
-    if (event.target === deleteModalOverlay) {
+    if (
+      event.target ===
+      deleteModalOverlay
+    ) {
       closeDeleteConfirmation();
     }
   }
@@ -1061,14 +1124,14 @@ usersSearchInput?.addEventListener(
 usersRoleFilter?.addEventListener(
   "change",
   () => {
-    // User role filtering will be added with loadUsers().
+    // Role filtering will be added with loadUsers().
   }
 );
 
 usersStatusFilter?.addEventListener(
   "change",
   () => {
-    // User status filtering will be added with loadUsers().
+    // Status filtering will be added with loadUsers().
   }
 );
 
@@ -1103,33 +1166,34 @@ requestsStatusFilter?.addEventListener(
 requestsProjectFilter?.addEventListener(
   "change",
   () => {
-    // Request project filtering will be added with loadRequests().
+    // Project filtering will be added with loadRequests().
   }
 );
 
 /*
  * ============================================================
- * Administrator logout
+ * Logout
  * ============================================================
  */
 
 adminLogoutButton?.addEventListener(
   "click",
   async () => {
-    if (!firebaseAuth) return;
-
     const originalText =
       adminLogoutButton.textContent;
 
     try {
-      adminLogoutButton.disabled = true;
-      adminLogoutButton.textContent = "…";
+      adminLogoutButton.disabled =
+        true;
+
+      adminLogoutButton.textContent =
+        "…";
 
       await signOut(firebaseAuth);
 
       /*
-       * onAuthStateChanged will detect the logout and redirect
-       * to index.html.
+       * onAuthStateChanged will receive null
+       * and redirect to index.html.
        */
     } catch (error) {
       console.error(
@@ -1137,7 +1201,9 @@ adminLogoutButton?.addEventListener(
         error
       );
 
-      adminLogoutButton.disabled = false;
+      adminLogoutButton.disabled =
+        false;
+
       adminLogoutButton.textContent =
         originalText || "↪";
     }
@@ -1148,10 +1214,6 @@ adminLogoutButton?.addEventListener(
  * ============================================================
  * Authentication guard
  * ============================================================
- *
- * This must remain near the bottom of the file.
- * The dashboard is enabled only after the current user is
- * verified as an administrator.
  */
 
 setAdminInterfaceEnabled(false);
@@ -1165,20 +1227,28 @@ onAuthStateChanged(
         "No authenticated user. Returning to the login page."
       );
 
-      window.location.replace("./index.html");
+      window.location.replace(
+        "./index.html"
+      );
+
       return;
     }
 
     try {
       const administrator =
-        await getAdministratorProfile(user);
+        await getAdministratorProfile(
+          user
+        );
 
       if (!administrator) {
         console.warn(
           "Access denied. The current user is not an administrator."
         );
 
-        window.location.replace("./index.html");
+        window.location.replace(
+          "./index.html"
+        );
+
         return;
       }
 
@@ -1209,7 +1279,9 @@ onAuthStateChanged(
         error
       );
 
-      window.location.replace("./index.html");
+      window.location.replace(
+        "./index.html"
+      );
     }
   },
 
@@ -1219,6 +1291,8 @@ onAuthStateChanged(
       error
     );
 
-    window.location.replace("./index.html");
+    window.location.replace(
+      "./index.html"
+    );
   }
 );
