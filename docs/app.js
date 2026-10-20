@@ -1,8 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import {getAnalytics,isSupported as isAnalyticsSupported} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-import { createUserWithEmailAndPassword,getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import { createUserWithEmailAndPassword,getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,browserSessionPersistence,setPersistence} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 import {addDoc,collection,doc, getDocs, getDoc,getFirestore,onSnapshot,query,serverTimestamp, setDoc, where} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-import { browserSessionPersistence, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, setPersistence, signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const authPanel = document.getElementById("auth-panel");
   const projectSelect = document.getElementById("project-select");
