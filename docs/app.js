@@ -1,29 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import {
-  getAnalytics,
-  isSupported as isAnalyticsSupported
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-import { 
-  createUserWithEmailAndPassword,
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-  getFirestore,
-  onSnapshot,
-  query,
-  serverTimestamp,
-  setDoc,
-  where
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-
+import {getAnalytics,isSupported as isAnalyticsSupported} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+import { createUserWithEmailAndPassword,getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+import {addDoc,collection,doc, getDocs, getDoc,getFirestore,onSnapshot,query,serverTimestamp, setDoc, where} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { browserSessionPersistence, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, setPersistence, signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 document.addEventListener("DOMContentLoaded", () => {
   const authPanel = document.getElementById("auth-panel");
   const projectSelect = document.getElementById("project-select");
@@ -549,10 +528,12 @@ function escapeHtml(value) {
     start();
   }
 
-  async function handleAuthSubmit(event) {
+  async function handleAuthSubmit(event)
+  {
     event.preventDefault();
 
-    if (!firebaseAuth || !isFirebaseReady) {
+    if (!firebaseAuth || !isFirebaseReady)
+		{
       showAuthMessage("Complete your Firebase configuration in docs/firebase-config.js to sign in.", true);
       return;
     }
@@ -560,36 +541,58 @@ function escapeHtml(value) {
     const email = authEmail.value.trim();
     const password = authPassword.value.trim();
 
-    if (!email || !password) {
+    if (!email || !password) 
+	{
       showAuthMessage("Please enter both your email and password.", true);
       return;
     }
 
-    try {
-      hideAuthMessage();
-if (authMode === "login") {
-  await signInWithEmailAndPassword(
-    firebaseAuth,
-    email,
-    password
-  );
-} else {
-  const userCredential =
-    await createUserWithEmailAndPassword(
-      firebaseAuth,
-      email,
-      password
-    );
+	try 
+	{
+	hideAuthMessage();
 
-  await createUserProfile(
-    userCredential.user
+	  /*
+	   * Keep the login only for the current browser session.
+	   * Closing the browser session clears the authentication state.
+	   */
+	await setPersistence( firebaseAuth,browserSessionPersistence);
+
+	  if (authMode === "login")
+		  {
+		await signInWithEmailAndPassword(
+		  firebaseAuth,
+		  email,
+		  password
+		);
+		} 
+  else 
+  {
+    const userCredential =
+      await createUserWithEmailAndPassword(
+        firebaseAuth,
+        email,
+        password
+      );
+
+    await createUserProfile(
+      userCredential.user
+    );
+	}
+  } 
+catch (error) {
+  console.error(
+    "Authentication failed:",
+    error
   );
-}
-``
-    } catch (error) {
-      const message = error?.message || "Authentication failed.";
-      showAuthMessage(message, true);
-    }
+
+  const message =
+    error?.message ||
+    "Authentication failed.";
+
+  showAuthMessage(message, true);
+  }
+
+
   }
 
 async function ensureUserProfile(user) {
