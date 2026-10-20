@@ -25,11 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const authMessage = document.getElementById("auth-message");
   const userAccount = document.getElementById("user-account");
   const accountEmail = document.getElementById("account-email");
-   const accountName = document.getElementById("account-name");
-      const accountAvatar = document.getElementById("account-avatar");
+  const accountName = document.getElementById("account-name");
+  const accountAvatar = document.getElementById("account-avatar");
   const authEmail = document.getElementById("auth-email");
   const authPassword = document.getElementById("auth-password");
-   const requestHistoryButton = document.getElementById("request-his-btn");
+  const requestHistoryButton = document.getElementById("request-his-btn");
   const signOutButton = document.getElementById("sign-out-btn");
 
   const defaultProjectData = {
@@ -120,7 +120,7 @@ const sampleRequests = [
     authPassword.setAttribute("minlength", isLogin ? "6" : "6");
   }
 
-function toggleAuthenticatedState(user) {
+  function toggleAuthenticatedState(user) {
   const isLoggedIn = Boolean(user);
 
   console.log("Authentication state:", {
@@ -197,7 +197,7 @@ function toggleAuthenticatedState(user) {
   }
 }
  
- function initializeFirebase() {
+  function initializeFirebase() {
     if (!isFirebaseReady) {
       showAuthMessage(
         "Add your Firebase web config in docs/firebase-config.js before using sign-in.",
@@ -227,7 +227,7 @@ function toggleAuthenticatedState(user) {
     }
   } 
 
-async function createUserProfile(user) {
+  async function createUserProfile(user) {
   if (!user || !firebaseDb) {
     throw new Error(
       "The authenticated user or Firestore is unavailable."
@@ -257,7 +257,7 @@ async function createUserProfile(user) {
   });
 }
 
- function formatRequestDate(timestamp) {
+  function formatRequestDate(timestamp) {
     if (!timestamp) return "Just now";
     const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString(undefined, {
@@ -267,7 +267,7 @@ async function createUserProfile(user) {
     });
   }
 
-function escapeHtml(value) {
+  function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
