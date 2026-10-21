@@ -466,12 +466,17 @@ const sampleRequests = [
         Array.isArray(project.elevationStyles)
           ? project.elevationStyles
           : [];
+      const interiorDesignOptions = 
+	          Array.isArray(project.designOptions)
+          ? project.designOptions
+          : [];
 
       firestoreProjects[projectName] = {
         id: projectDocument.id,
         code: project.code || "",
         status: project.status || "",
-        elevations: elevationStyles
+        elevations: elevationStyles,
+		designOptions : interiorDesignOptions
       };
     });
 
