@@ -8,7 +8,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-import {doc,getDoc,getFirestore,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import {doc,getDoc,getFirestore,collection,getDocs,addDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 /*
  * ============================================================
  * Firebase initialization
@@ -728,25 +728,40 @@ function handleCreateUserDesignSubmit(event) {
     "message success";
 }
 
-function handleCreateProjectDesignSubmit(event) {
+async function handleCreateProjectDesignSubmit(event) {
   event.preventDefault();
 
-  const message =
+  const projectName =
     document.getElementById(
-      "create-project-message"
-    );
+      "create-project-name"
+    ).value.trim();
 
-  if (!message) {
-    return;
-  }
+  const projectStatus =
+    document.getElementById(
+      "create-project-status"
+    ).value;
 
-  message.textContent =
-    "The Create Project interface is ready. Firestore project creation will be added next.";
+  const projectCode =
+    document.getElementById(
+      "create-project-code"
+    ).value.trim();
 
-  message.className =
-    "message success";
+  await addDoc(
+    collection(firebaseDb, "projects"),
+    {
+      name: projectName,
+      status: projectStatus,
+      code: projectCode,
+      createdAt: new Date()
+    }
+  );
+
+  alert("Project created");
+
+  closeActionModal();
+
+  await loadProjects();
 }
-
 /*
  * ============================================================
  * Detail drawer
