@@ -687,6 +687,7 @@ async function editUser(userId) {
   }, 0);
 }
 
+window.editUser = editUser;
 function moveSelected(
   sourceId,
   targetId
