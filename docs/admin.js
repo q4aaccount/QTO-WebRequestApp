@@ -9,6 +9,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
 import {doc,getDoc,getFirestore,collection,getDocs,addDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+import {
+  updateDoc,
+  arrayUnion,
+  arrayRemove
+} from
+"https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
 /*
  * ============================================================
  * Firebase initialization
@@ -584,6 +592,211 @@ async function loadUsers() {
     snapshot.size;
 }
 
+async function editUser(userId) {
+
+  const userDoc = await getDoc(
+    doc(firebaseDb, "users", userId)
+  );
+
+  const user = userDoc.data();
+
+  const projectsSnapshot = await getDocs(
+    collection(firebaseDb, "projects")
+  );
+
+  let availableProjectsHtml = "";
+  let assignedProjectsHtml = "";
+
+  projectsSnapshot.forEach((projectDoc) => {
+
+    const project = projectDoc.data();
+
+    const isAssigned =
+      project.assignedUserIds?.includes(userId);
+
+    const item = `
+      <option value="${projectDoc.id}">
+        ${project.name}
+      </option>
+    `;
+
+    if (isAssigned) {
+      assignedProjectsHtml += item;
+    } else {
+      availableProjectsHtml += item;
+    }
+  });
+
+  openDetailDrawer({
+    eyebrow: "User Management",
+    title: `Edit ${user.displayName || user.email}`,
+    content: `
+      <div class="assignment-layout">
+
+        <div>
+          <h4>Available Projects</h4>
+          <select
+            id="available-projects"
+            multiple
+            size="10">
+            ${availableProjectsHtml}
+          </select>
+        </div>
+
+        <div class="assignment-buttons">
+          <button id="assign-projects">
+            →
+          </button>
+
+          <button id="remove-projects">
+            ←
+          </button>
+        </div>
+
+        <div>
+          <h4>Assigned Projects</h4>
+          <select
+            id="assigned-projects"
+            multiple
+            size="10">
+            ${assignedProjectsHtml}
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button
+          id="save-user-projects"
+          class="primary-button">
+          Save Changes
+        </button>
+      </div>
+    `
+  });
+
+  setTimeout(() => {
+    attachProjectAssignmentEvents(userId);
+  }, 0);
+}
+
+function moveSelected(
+  sourceId,
+  targetId
+) {
+
+  const source =
+    document.getElementById(sourceId);
+
+  const target =
+    document.getElementById(targetId);
+
+  Array.from(source.selectedOptions)
+    .forEach(option => {
+      target.appendChild(option);
+    });
+}
+
+async function saveUserProjects(userId) {
+
+  const assignedList =
+    document.getElementById(
+      "assigned-projects"
+    );
+
+  const assignedProjectIds =
+    Array.from(
+      assignedList.options
+    ).map(
+      option => option.value
+    );
+
+  const projectsSnapshot =
+    await getDocs(
+      collection(firebaseDb, "projects")
+    );
+
+  const updates = [];
+
+  projectsSnapshot.forEach((projectDoc) => {
+
+    const projectId =
+      projectDoc.id;
+
+    const projectRef = doc(
+      firebaseDb,
+      "projects",
+      projectId
+    );
+
+    if (
+      assignedProjectIds.includes(
+        projectId
+      )
+    ) {
+      updates.push(
+        updateDoc(projectRef, {
+          assignedUserIds:
+            arrayUnion(userId)
+        })
+      );
+    } else {
+      updates.push(
+        updateDoc(projectRef, {
+          assignedUserIds:
+            arrayRemove(userId)
+        })
+      );
+    }
+  });
+
+  await Promise.all(updates);
+
+  alert(
+    "Project assignments updated."
+  );
+
+  closeDetailDrawer();
+
+  await loadUsers();
+  await loadProjects();
+}
+
+function attachProjectAssignmentEvents(userId) {
+
+  document
+    .getElementById("assign-projects")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        moveSelected(
+          "available-projects",
+          "assigned-projects"
+        );
+      }
+    );
+
+  document
+    .getElementById("remove-projects")
+    ?.addEventListener(
+      "click",
+      () => {
+
+        moveSelected(
+          "assigned-projects",
+          "available-projects"
+        );
+      }
+    );
+
+  document
+    .getElementById("save-user-projects")
+    ?.addEventListener(
+      "click",
+      () => saveUserProjects(userId)
+    );
+}
 
 async function loadProjects() {
 

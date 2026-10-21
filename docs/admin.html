@@ -497,8 +497,8 @@
                     <th>User</th>
 					<th>Email</th>
                     <th>Role</th>
-                    <th>Projects</th>
 					<th>Status</th>
+					                    <th>Projects</th>
                     <th>Requests</th>
                     <th>Last sign-in</th>
                     <th>
@@ -506,7 +506,15 @@
                         Actions
                       </span>
                     </th>
+					<td>
+					  <button
+						class="secondary-button"
+						onclick="editUser('${userDoc.id}')">
+						Edit
+					  </button>
+					</td>
                   </tr>
+				  
                 </thead>
 
                 <tbody id="admin-users-table-body">
