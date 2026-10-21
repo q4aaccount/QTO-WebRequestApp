@@ -5,10 +5,11 @@ import {
 import {
   getAuth,
   onAuthStateChanged,
+  serverTimestamp,
   signOut
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-import {doc,getDoc,getFirestore,collection,getDocs,addDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import {doc,getDoc,getFirestore,collection,getDocs,addDoc,setDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 import {
   updateDoc,
@@ -681,10 +682,7 @@ async function editUser(userId) {
       </div>
     `
   });
-
-  setTimeout(() => {
-    attachProjectAssignmentEvents(userId);
-  }, 0);
+  attachProjectAssignmentEvents(userId);
 }
 
 window.editUser = editUser;
@@ -706,104 +704,186 @@ function moveSelected(
 }
 
 async function saveUserProjects(userId) {
+  const saveButton =
+    document.getElementById("save-user-projects");
 
   const assignedList =
-    document.getElementById(
-      "assigned-projects"
+    document.getElementById("assigned-projects");
+
+  if (!userId) {
+    console.error("Cannot save assignments: userId is missing.");
+    alert("The user ID is missing.");
+
+    return;
+  }
+
+  if (!assignedList) {
+    console.error(
+      "Cannot save assignments: #assigned-projects was not found."
     );
 
-  const assignedProjectIds =
-    Array.from(
-      assignedList.options
-    ).map(
-      option => option.value
-    );
+    alert("The assigned-projects list was not found.");
 
-  const projectsSnapshot =
-    await getDocs(
+    return;
+  }
+
+  const assignedProjectIds = Array.from(
+    assignedList.options
+  ).map((option) => option.value);
+
+  console.log("Saving project assignments:", {
+    userId,
+    assignedProjectIds
+  });
+
+  try {
+    if (saveButton) {
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving...";
+    }
+
+    const projectsSnapshot = await getDocs(
       collection(firebaseDb, "projects")
     );
 
-  const updates = [];
-
-  projectsSnapshot.forEach((projectDoc) => {
-
-    const projectId =
-      projectDoc.id;
-
-    const projectRef = doc(
-      firebaseDb,
-      "projects",
-      projectId
+    console.log(
+      "Projects checked:",
+      projectsSnapshot.size
     );
 
-    if (
-      assignedProjectIds.includes(
+    const updates = [];
+
+    projectsSnapshot.forEach((projectSnapshot) => {
+      const projectId = projectSnapshot.id;
+      const project = projectSnapshot.data();
+
+      const currentAssignedUserIds =
+        Array.isArray(project.assignedUserIds)
+          ? project.assignedUserIds
+          : [];
+
+      const isCurrentlyAssigned =
+        currentAssignedUserIds.includes(userId);
+
+      const shouldBeAssigned =
+        assignedProjectIds.includes(projectId);
+
+      const projectReference = doc(
+        firebaseDb,
+        "projects",
         projectId
-      )
-    ) {
-      updates.push(
-        updateDoc(projectRef, {
-          assignedUserIds:
-            arrayUnion(userId)
-        })
       );
-    } else {
-      updates.push(
-        updateDoc(projectRef, {
-          assignedUserIds:
-            arrayRemove(userId)
-        })
-      );
+
+      if (shouldBeAssigned && !isCurrentlyAssigned) {
+        console.log(
+          `Assigning user ${userId} to project ${projectId}`
+        );
+
+        updates.push(
+          updateDoc(projectReference, {
+            assignedUserIds: arrayUnion(userId)
+          })
+        );
+      }
+
+      if (!shouldBeAssigned && isCurrentlyAssigned) {
+        console.log(
+          `Removing user ${userId} from project ${projectId}`
+        );
+
+        updates.push(
+          updateDoc(projectReference, {
+            assignedUserIds: arrayRemove(userId)
+          })
+        );
+      }
+    });
+
+    console.log(
+      "Number of project updates:",
+      updates.length
+    );
+
+    await Promise.all(updates);
+
+    console.log(
+      "Project assignments successfully saved."
+    );
+
+    await Promise.all([
+      loadUsers(),
+      loadProjects()
+    ]);
+
+    closeDetailDrawer();
+
+    alert("Project assignments updated successfully.");
+  } catch (error) {
+    console.error(
+      "Saving project assignments failed:",
+      error
+    );
+
+    alert(
+      error?.message ||
+      "Project assignments could not be saved."
+    );
+  } finally {
+    if (saveButton) {
+      saveButton.disabled = false;
+      saveButton.textContent = "Save Changes";
     }
-  });
-
-  await Promise.all(updates);
-
-  alert(
-    "Project assignments updated."
-  );
-
-  closeDetailDrawer();
-
-  await loadUsers();
-  await loadProjects();
+  }
 }
 
 function attachProjectAssignmentEvents(userId) {
+  const assignButton =
+    document.getElementById("assign-projects");
 
-  document
-    .getElementById("assign-projects")
-    ?.addEventListener(
-      "click",
-      () => {
+  const removeButton =
+    document.getElementById("remove-projects");
 
-        moveSelected(
-          "available-projects",
-          "assigned-projects"
-        );
-      }
-    );
+  const saveButton =
+    document.getElementById("save-user-projects");
 
-  document
-    .getElementById("remove-projects")
-    ?.addEventListener(
-      "click",
-      () => {
+  console.log("Attaching project assignment events:", {
+    userId,
+    assignButtonFound: Boolean(assignButton),
+    removeButtonFound: Boolean(removeButton),
+    saveButtonFound: Boolean(saveButton)
+  });
 
-        moveSelected(
-          "assigned-projects",
-          "available-projects"
-        );
-      }
-    );
+  assignButton?.addEventListener(
+    "click",
+    () => {
+      moveSelected(
+        "available-projects",
+        "assigned-projects"
+      );
+    }
+  );
 
-  document
-    .getElementById("save-user-projects")
-    ?.addEventListener(
-      "click",
-      () => saveUserProjects(userId)
-    );
+  removeButton?.addEventListener(
+    "click",
+    () => {
+      moveSelected(
+        "assigned-projects",
+        "available-projects"
+      );
+    }
+  );
+
+  saveButton?.addEventListener(
+    "click",
+    async () => {
+      console.log(
+        "Save Changes clicked for user:",
+        userId
+      );
+
+      await saveUserProjects(userId);
+    }
+  );
 }
 
 async function loadProjects() {
