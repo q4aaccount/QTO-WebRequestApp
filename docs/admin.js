@@ -567,9 +567,10 @@ async function loadUsers() {
         <td>${user.displayName || "-"}</td>
 		        <td>${user.email || "-"}</td>
 		        <td>${user.role || "user"}</td>
-				        <td>${user.active ? "Active" : "Inactive"}</td>
-				 <td>${user.projects || "-"}</td>
-
+				<td>${user.active ? "Active" : "Inactive"}</td>
+				<td>${user.projects || "-"}</td>
+                <td>${user.requests || "-"}</td>
+				<td>${user.createdAt || "-"}</td>
 
 
       </tr>
