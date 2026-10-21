@@ -396,43 +396,169 @@ const sampleRequests = [
     );
   }
 
-  async function loadProjectData() {
-    if (!firebaseDb || !projectSelect) return;
-
-    try {
-      const snapshot = await getDocs(collection(firebaseDb, "projects"));
-      const firestoreProjects = {};
-
-      snapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        const projectName = data.name || data.projectName || doc.id;
-        firestoreProjects[projectName] = {
-          elevations: Array.isArray(data.elevations) ? data.elevations : defaultProjectData[projectName]?.elevations || []
-        };
-      });
-
-      if (Object.keys(firestoreProjects).length) {
-        projectData = firestoreProjects;
+  async function loadProjectData(user) {
+  if (!firebaseDb || !projectSelect) {
+    console.error(
+      "Cannot load projects because Firestore or projectSelect is unavailable.",
+      {
+        firebaseDbAvailable: Boolean(firebaseDb),
+        projectSelectAvailable: Boolean(projectSelect)
       }
-    } catch (error) {
-      console.warn("Project data not available from Firestore, using defaults.", error);
-      projectData = { ...defaultProjectData };
-    }
+    );
+
+    return;
+  }
+
+  if (!user?.uid) {
+    console.error(
+      "Cannot load assigned projects because the user UID is missing."
+    );
+
+    projectData = {};
+    populateProjects();
+
+    return;
+  }
+
+  try {
+    console.log(
+      "Loading assigned projects for user:",
+      user.uid
+    );
+
+    const assignedProjectsQuery = query(
+      collection(firebaseDb, "projects"),
+      where(
+        "assignedUserIds",
+        "array-contains",
+        user.uid
+      )
+    );
+
+    const snapshot = await getDocs(
+      assignedProjectsQuery
+    );
+
+    console.log(
+      "Assigned projects found:",
+      snapshot.size
+    );
+
+    const firestoreProjects = {};
+
+    snapshot.forEach((projectDocument) => {
+      const project = projectDocument.data();
+
+      console.log(
+        "Assigned project loaded:",
+        {
+          id: projectDocument.id,
+          project
+        }
+      );
+
+      const projectName =
+        project.name ||
+        project.projectName ||
+        projectDocument.id;
+
+      const elevationStyles =
+        Array.isArray(project.elevationStyles)
+          ? project.elevationStyles
+          : [];
+
+      firestoreProjects[projectName] = {
+        id: projectDocument.id,
+        code: project.code || "",
+        status: project.status || "",
+        elevations: elevationStyles
+      };
+    });
+
+    projectData = firestoreProjects;
 
     populateProjects();
+
+    if (snapshot.empty) {
+      console.warn(
+        "No projects are assigned to this user:",
+        user.uid
+      );
+
+      setFormMessage(
+        formMessage,
+        "No projects are currently assigned to your account.",
+        true
+      );
+    } else {
+      hideFormMessage(formMessage);
+    }
+  } catch (error) {
+    console.error(
+      "Loading assigned projects failed:",
+      error
+    );
+
+    projectData = {};
+    populateProjects();
+
+    setFormMessage(
+      formMessage,
+      error?.message ||
+        "Unable to load your assigned projects.",
+      true
+    );
+  }
+}
+
+function populateProjects() {
+  if (!projectSelect) {
+    return;
   }
 
-  function populateProjects() {
-    if (!projectSelect) return;
-    projectSelect.innerHTML = '<option value="">Select a project</option>';
-    Object.keys(projectData).forEach((projectName) => {
-      const option = document.createElement("option");
-      option.value = projectName;
-      option.textContent = projectName;
-      projectSelect.appendChild(option);
-    });
-    updateOptions();
+  projectSelect.innerHTML = "";
+
+  const projectNames =
+    Object.keys(projectData);
+
+  const placeholder =
+    document.createElement("option");
+
+  placeholder.value = "";
+
+  if (projectNames.length === 0) {
+    placeholder.textContent =
+      currentUser
+        ? "No projects assigned"
+        : "Select a project";
+
+    placeholder.disabled = true;
+  } else {
+    placeholder.textContent =
+      "Select a project";
   }
+
+  placeholder.selected = true;
+
+  projectSelect.appendChild(
+    placeholder
+  );
+
+  projectNames.forEach((projectName) => {
+    const option =
+      document.createElement("option");
+
+    option.value = projectName;
+    option.textContent = projectName;
+
+    projectSelect.appendChild(option);
+  });
+
+  projectSelect.disabled =
+    projectNames.length === 0;
+
+  updateOptions();
+}
 
   function updateInteriorOptions() {
     if (!scopeSelect || !interiorOptionsWrapper || !interiorOptions) return;
