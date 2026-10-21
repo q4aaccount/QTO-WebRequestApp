@@ -640,7 +640,7 @@ async function editUser(userId) {
     content: `
       <div class="assignment-layout">
 
-        <div>
+        <div class="assignment-column">
           <h4>Available Projects</h4>
           <select
             id="available-projects"

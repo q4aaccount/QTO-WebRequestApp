@@ -582,6 +582,132 @@ button:disabled {
   background: rgba(255, 255, 255, 0.15);
 }
 
+
+/* ============================================================
+   Project assignment dual-list
+   ============================================================ */
+
+.assignment-layout {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr)
+    56px
+    minmax(220px, 1fr);
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.assignment-column {
+  min-width: 0;
+}
+
+.assignment-column h4 {
+  margin: 0 0 10px;
+  color: #20263a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.assignment-column select {
+  width: 100%;
+  min-height: 280px;
+  padding: 8px;
+  border: 1px solid #d7dce5;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #20263a;
+  font: inherit;
+  outline: none;
+}
+
+.assignment-column select:focus {
+  border-color: #4361ee;
+  box-shadow: 0 0 0 3px
+    rgba(67, 97, 238, 0.14);
+}
+
+.assignment-column option {
+  padding: 10px 8px;
+  border-radius: 5px;
+}
+
+.assignment-column option:checked {
+  background: #4361ee
+    linear-gradient(
+      0deg,
+      #4361ee 0%,
+      #4361ee 100%
+    );
+  color: #ffffff;
+}
+
+.assignment-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.assignment-buttons button {
+  width: 44px;
+  height: 40px;
+  border: 1px solid #d7dce5;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #20263a;
+  font-size: 20px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.assignment-buttons button:hover {
+  border-color: #4361ee;
+  background-color: #eef1ff;
+  color: #4361ee;
+}
+
+.assignment-buttons button:active {
+  transform: scale(0.96);
+}
+
+/* Save button area */
+.assignment-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Responsive layout */
+@media (max-width: 700px) {
+  .assignment-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-buttons {
+    flex-direction: row;
+  }
+
+  .assignment-buttons button {
+    transform: rotate(90deg);
+  }
+
+  .assignment-buttons button:active {
+    transform: rotate(90deg) scale(0.96);
+  }
+
+  .assignment-column select {
+    min-height: 190px;
+  }
+}
+
+
 /* ==========================================================
    Administration pages
    ========================================================== */
