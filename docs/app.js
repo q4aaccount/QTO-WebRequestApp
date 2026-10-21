@@ -562,20 +562,88 @@ function populateProjects() {
   projectSelect.disabled =
     projectNames.length === 0;
 
-  updateOptions();
+  updateElevations();
 }
 
   function updateInteriorOptions() {
-    if (!scopeSelect || !interiorOptionsWrapper || !interiorOptions) return;
-
-    const selectedScope = scopeSelect.value;
-    const showInterior = selectedScope === "Interior" || selectedScope === "Both";
-
-    interiorOptionsWrapper.classList.toggle("hidden", !showInterior);
-    interiorOptions.required = showInterior;
+  if (
+    !projectSelect ||
+    !scopeSelect ||
+    !interiorOptionsWrapper ||
+    !interiorOptions
+  ) {
+    return;
   }
 
-  function updateOptions() {
+  const selectedProjectName =
+    projectSelect.value;
+
+  const selectedProject =
+    projectData[selectedProjectName];
+
+  const selectedScope =
+    scopeSelect.value;
+
+  const showInteriorOptions =
+    selectedScope === "Interior" ||
+    selectedScope === "Both";
+
+  interiorOptionsWrapper.classList.toggle(
+    "hidden",
+    !showInteriorOptions
+  );
+
+  interiorOptions.required =
+    showInteriorOptions;
+
+  interiorOptions.disabled =
+    !showInteriorOptions;
+
+  interiorOptions.innerHTML = `
+    <option value="">
+      Select an interior design option
+    </option>
+  `;
+
+  if (!showInteriorOptions) {
+    interiorOptions.value = "";
+    return;
+  }
+
+  if (!selectedProject) {
+    return;
+  }
+
+  const designOptions =
+    Array.isArray(selectedProject.designOptions)
+      ? selectedProject.designOptions
+      : [];
+
+  designOptions.forEach((designOption) => {
+    const option =
+      document.createElement("option");
+
+    option.value =
+      String(designOption);
+
+    option.textContent =
+      String(designOption);
+
+    interiorOptions.appendChild(option);
+  });
+
+  if (designOptions.length === 0) {
+    interiorOptions.innerHTML = `
+      <option value="">
+        No interior design options available
+      </option>
+    `;
+
+    interiorOptions.disabled = true;
+  }
+}
+
+  function updateElevations() {
     if (!projectSelect || !elevationSelect) return;
 
     const selectedProject = projectSelect.value;
@@ -862,10 +930,17 @@ async function getUserProfile(user) {
     button.addEventListener("click", () => setActiveTab(button.dataset.tab));
   });
 
-  if (projectSelect) {
-    populateProjects();
-    projectSelect.addEventListener("change", updateOptions);
-  }
+if (projectSelect) {
+  populateProjects();
+
+  projectSelect.addEventListener(
+    "change",
+    () => {
+      updateElevations();
+      updateInteriorOptions();
+    }
+  );
+}
 
   if (scopeSelect) {
     scopeSelect.addEventListener("change", updateInteriorOptions);
@@ -892,7 +967,7 @@ async function getUserProfile(user) {
 
   renderRequests();
   setActiveTab("home");
-  updateOptions();
+  updateElevations();
   updateInteriorOptions();
   initSlideshow();
   setAuthMode("login");
