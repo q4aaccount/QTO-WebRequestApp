@@ -585,33 +585,82 @@ async function loadProjects() {
 
   projectsTableBody.innerHTML = "";
 
-  const snapshot = await getDocs(
+  // Load all users first
+  const usersSnapshot = await getDocs(
+    collection(firebaseDb, "users")
+  );
+
+  const usersMap = {};
+
+  usersSnapshot.forEach((userDoc) => {
+    const user = userDoc.data();
+
+    usersMap[userDoc.id] =
+      user.displayName ||
+      user.email ||
+      userDoc.id;
+  });
+
+  // Load projects
+  const projectsSnapshot = await getDocs(
     collection(firebaseDb, "projects")
   );
 
   console.log(
     "Projects found:",
-    snapshot.size
+    projectsSnapshot.size
   );
 
-  snapshot.forEach((projectDoc) => {
+  projectsSnapshot.forEach((projectDoc) => {
 
     const project = projectDoc.data();
+
+    const assignedUsers =
+      (project.assignedUserIds || [])
+        .map(uid => usersMap[uid] || uid)
+        .join(", ");
+
+    const elevations =
+      (project.elevationStyles || [])
+        .join(", ");
+
+    const createdDate =
+      project.createdAt?.toDate
+        ? project.createdAt
+            .toDate()
+            .toLocaleDateString()
+        : "-";
 
     projectsTableBody.innerHTML += `
       <tr>
         <td>${project.name || "-"}</td>
         <td>${project.code || "-"}</td>
         <td>${project.status || "-"}</td>
+        <td>${assignedUsers || "-"}</td>
+        <td>${elevations || "-"}</td>
+        <td>${createdDate}</td>
+        <td>
+          <button
+            class="secondary-button"
+            onclick="editProject('${projectDoc.id}')">
+            Edit
+          </button>
+
+          <button
+            class="danger-button"
+            onclick="deleteProject('${projectDoc.id}')">
+            Delete
+          </button>
+        </td>
       </tr>
     `;
   });
 
   dashboardProjectsCount.textContent =
-    snapshot.size;
+    projectsSnapshot.size;
 
   sidebarProjectsCount.textContent =
-    snapshot.size;
+    projectsSnapshot.size;
 }
 
 function attachModalFormEvents(action) {
@@ -732,35 +781,56 @@ async function handleCreateProjectDesignSubmit(event) {
   event.preventDefault();
 
   const projectName =
-    document.getElementById(
-      "create-project-name"
-    ).value.trim();
+    document
+      .getElementById("create-project-name")
+      .value
+      .trim();
 
   const projectStatus =
-    document.getElementById(
-      "create-project-status"
-    ).value;
+    document
+      .getElementById("create-project-status")
+      .value;
 
   const projectCode =
-    document.getElementById(
-      "create-project-code"
-    ).value.trim();
+    document
+      .getElementById("create-project-code")
+      .value
+      .trim();
+
+  const elevationStyles =
+    document
+      .getElementById("create-project-elevations")
+      .value
+      .split("\n")
+      .map(style => style.trim())
+      .filter(style => style);
+
+  // Get selected users
+  const assignedUserIds = Array.from(
+    document.querySelectorAll(
+      "#create-project-user-options input[type='checkbox']:checked"
+    )
+  ).map(checkbox => checkbox.value);
 
   await addDoc(
     collection(firebaseDb, "projects"),
     {
       name: projectName,
-      status: projectStatus,
       code: projectCode,
+      status: projectStatus,
+      elevationStyles,
+      assignedUserIds,
       createdAt: new Date()
     }
   );
 
-  alert("Project created");
+  alert("Project created successfully");
 
   closeActionModal();
 
-  await loadProjects();
+  if (typeof loadProjects === "function") {
+    await loadProjects();
+  }
 }
 /*
  * ============================================================
