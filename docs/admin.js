@@ -8,12 +8,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-import {
-  doc,
-  getDoc,
-  getFirestore
-} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-
+import {doc,getDoc,getFirestore,collection,getDocs} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 /*
  * ============================================================
  * Firebase initialization
@@ -547,6 +542,77 @@ function getCreateProjectForm() {
  * Modal functions
  * ============================================================
  */
+async function loadUsers() {
+
+  if (!usersTableBody) return;
+
+  usersTableBody.innerHTML = "";
+
+  const snapshot = await getDocs(
+    collection(firebaseDb, "users")
+  );
+
+  console.log(
+    "Users found:",
+    snapshot.size
+  );
+
+  snapshot.forEach((userDoc) => {
+
+    const user = userDoc.data();
+
+    usersTableBody.innerHTML += `
+      <tr>
+        <td>${user.displayName || "-"}</td>
+        <td>${user.email || "-"}</td>
+        <td>${user.role || "user"}</td>
+        <td>${user.active ? "Active" : "Inactive"}</td>
+      </tr>
+    `;
+  });
+
+  dashboardUsersCount.textContent =
+    snapshot.size;
+
+  sidebarUsersCount.textContent =
+    snapshot.size;
+}
+
+
+async function loadProjects() {
+
+  if (!projectsTableBody) return;
+
+  projectsTableBody.innerHTML = "";
+
+  const snapshot = await getDocs(
+    collection(firebaseDb, "projects")
+  );
+
+  console.log(
+    "Projects found:",
+    snapshot.size
+  );
+
+  snapshot.forEach((projectDoc) => {
+
+    const project = projectDoc.data();
+
+    projectsTableBody.innerHTML += `
+      <tr>
+        <td>${project.name || "-"}</td>
+        <td>${project.code || "-"}</td>
+        <td>${project.status || "-"}</td>
+      </tr>
+    `;
+  });
+
+  dashboardProjectsCount.textContent =
+    snapshot.size;
+
+  sidebarProjectsCount.textContent =
+    snapshot.size;
+}
 
 function attachModalFormEvents(action) {
   if (action === "create-user") {
@@ -897,50 +963,12 @@ function displayAdministratorProfile(
  */
 
 async function initializeAdminDashboard() {
-  if (dashboardUsersCount) {
-    dashboardUsersCount.textContent =
-      "0";
-  }
 
-  if (dashboardProjectsCount) {
-    dashboardProjectsCount.textContent =
-      "0";
-  }
+  await Promise.all([
+    loadUsers(),
+    loadProjects()
+  ]);
 
-  if (dashboardRequestsCount) {
-    dashboardRequestsCount.textContent =
-      "0";
-  }
-
-  if (dashboardPendingCount) {
-    dashboardPendingCount.textContent =
-      "0";
-  }
-
-  if (sidebarUsersCount) {
-    sidebarUsersCount.textContent =
-      "0";
-  }
-
-  if (sidebarProjectsCount) {
-    sidebarProjectsCount.textContent =
-      "0";
-  }
-
-  if (sidebarRequestsCount) {
-    sidebarRequestsCount.textContent =
-      "0";
-  }
-
-  /*
-   * Firestore loading will be added here:
-   *
-   * await Promise.all([
-   *   loadUsers(),
-   *   loadProjects(),
-   *   loadRequests()
-   * ]);
-   */
 }
 
 /*
