@@ -9,7 +9,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
 
-import {doc,getDoc,getFirestore,collection,getDocs,addDoc,setDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import {doc,getDoc,getFirestore,collection,getDocs,addDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 import {
   updateDoc,
