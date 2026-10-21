@@ -579,6 +579,13 @@ async function loadUsers() {
 				<td>${user.projects || "-"}</td>
                 <td>${user.requests || "-"}</td>
 				<td>${user.createdAt || "-"}</td>
+									<td>
+					  <button
+						class="secondary-button"
+						onclick="editUser('${userDoc.id}')">
+						Edit
+					  </button>
+					</td>
 
 
       </tr>
