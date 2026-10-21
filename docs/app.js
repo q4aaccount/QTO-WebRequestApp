@@ -380,7 +380,7 @@ const sampleRequests = [
       return;
     }
 
-    const q = query(collection(firebaseDb, "projectRequests"), where("uid", "==", user.uid));
+    const q = query(collection(firebaseDb, "qtoRequests"), where("uid", "==", user.uid));
     unsubscribeRequests = onSnapshot(
       q,
       (snapshot) => {
@@ -873,7 +873,7 @@ async function handleSignOut() {
       elevation: elevationSelect.value,
       scope: scopeSelect.value,
       interiorOption: interiorOptions?.value || "",
-      uid: currentUser.uid,
+      userId: currentUser.uid,
       email: currentUser.email,
       createdAt: serverTimestamp()
     };
@@ -883,13 +883,13 @@ async function handleSignOut() {
       return;
     }
 
-    addDoc(collection(firebaseDb, "projectRequests"), request)
+    addDoc(collection(firebaseDb, "qtoRequests"), request)
       .then(() => {
         setFormMessage(formMessage, `Request submitted for ${request.project} • ${request.elevation} • ${request.scope}.`);
         form.reset();
         projectSelect.selectedIndex = 0;
         scopeSelect.selectedIndex = 0;
-        updateOptions();
+        updateElevations();
         updateInteriorOptions();
       })
       .catch((error) => {
