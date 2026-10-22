@@ -333,7 +333,8 @@ const sampleRequests = [
         request.interiorOption
           ? ` • ${escapeHtml(request.interiorOption)}`
           : "";
-
+const submittedBy =
+  request.submittedBy || "jsampson";
       return `
         <li class="request-item ${
           request.isSample ? "sample-request" : ""
@@ -353,6 +354,12 @@ const sampleRequests = [
                 • ${escapeHtml(request.scope)}
                 ${interiorDetails}
               </div>
+			              <div class="request-submitted-by">
+              Submitted by:
+              <strong>
+                ${escapeHtml(submittedBy)}
+              </strong>
+            </div>
             </div>
 
             <span class="request-eta">
