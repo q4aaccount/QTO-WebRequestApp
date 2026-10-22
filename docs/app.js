@@ -368,33 +368,111 @@ const sampleRequests = [
     sampleNotice + requestItems;
 }
 
-  function listenForUserRequests(user) {
-    if (unsubscribeRequests) {
-      unsubscribeRequests();
-      unsubscribeRequests = null;
-    }
+ function listenForUserRequests(user) {
+  if (unsubscribeRequests) {
+    unsubscribeRequests();
+    unsubscribeRequests = null;
+  }
 
-    if (!user || !firebaseDb) {
-      requests = [];
-      renderRequests();
-      return;
-    }
+  if (!user || !firebaseDb) {
+    requests = [];
+    renderRequests();
+    return;
+  }
 
-    const q = query(collection(firebaseDb, "qtoRequests"), where("uid", "==", user.uid));
-    unsubscribeRequests = onSnapshot(
-      q,
-      (snapshot) => {
-        requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        renderRequests();
-      },
-      (error) => {
-        console.error("Firestore request listener failed:", error);
-        requests = [];
-        renderRequests();
-        setFormMessage(formMessage, "Unable to load your saved requests right now.", true);
+  const assignedProjectIds =
+    Object.values(projectData)
+      .map((project) => project.id)
+      .filter(Boolean);
+
+  if (assignedProjectIds.length === 0) {
+    requests = [];
+    renderRequests();
+    return;
+  }
+
+  const requestsByProject =
+    new Map();
+
+  const projectUnsubscribers =
+    assignedProjectIds.map(
+      (projectDocumentId) => {
+        const projectRequestsQuery =
+          query(
+            collection(
+              firebaseDb,
+              "qtoRequests"
+            ),
+            where(
+              "projectDocumentId",
+              "==",
+              projectDocumentId
+            )
+          );
+
+        return onSnapshot(
+          projectRequestsQuery,
+
+          (snapshot) => {
+            const projectRequests =
+              snapshot.docs.map(
+                (requestDocument) => ({
+                  id: requestDocument.id,
+                  ...requestDocument.data()
+                })
+              );
+
+            requestsByProject.set(
+              projectDocumentId,
+              projectRequests
+            );
+
+            requests =
+              Array.from(
+                requestsByProject.values()
+              ).flat();
+
+            renderRequests();
+            hideFormMessage(formMessage);
+          },
+
+          (error) => {
+            console.error(
+              `Request listener failed for project ${projectDocumentId}:`,
+              error
+            );
+
+            requestsByProject.set(
+              projectDocumentId,
+              []
+            );
+
+            requests =
+              Array.from(
+                requestsByProject.values()
+              ).flat();
+
+            renderRequests();
+
+            setFormMessage(
+              formMessage,
+              "Unable to load one or more project request histories.",
+              true
+            );
+          }
+        );
       }
     );
-  }
+
+  // Store one cleanup function that stops all listeners.
+  unsubscribeRequests = () => {
+    projectUnsubscribers.forEach(
+      (unsubscribe) => unsubscribe()
+    );
+
+    requestsByProject.clear();
+  };
+}
 
   async function loadProjectData(user) {
   if (!firebaseDb || !projectSelect) {
@@ -868,15 +946,32 @@ async function handleSignOut() {
       return;
     }
 
-    const request = {
-      project: projectSelect.value,
-      elevation: elevationSelect.value,
-      scope: scopeSelect.value,
-      interiorOption: interiorOptions?.value || "",
-      userId: currentUser.uid,
-      email: currentUser.email,
-      createdAt: serverTimestamp()
-    };
+const selectedProjectName =
+  projectSelect.value;
+
+const selectedProject =
+  projectData[selectedProjectName];
+
+if (!selectedProject?.id) {
+  setFormMessage(
+    formMessage,
+    "The selected project could not be identified. Please refresh the page and try again.",
+    true
+  );
+
+  return;
+}
+
+const request = {
+  projectDocumentId: selectedProject.id,
+  project: selectedProjectName,
+  elevation: elevationSelect.value,
+  scope: scopeSelect.value,
+  interiorOption: interiorOptions?.value || "",
+  userId: currentUser.uid,
+  email: currentUser.email || "",
+  createdAt: serverTimestamp()
+};
 
     if (!firebaseDb) {
       setFormMessage(formMessage, "Firebase Firestore is not configured yet.", true);
